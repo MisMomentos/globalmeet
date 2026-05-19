@@ -357,14 +357,15 @@ function LandingScreen({ onLogin, onTrial }) {
         ))}
       </div>
 
-      {/* Plans — horizontal scroll on mobile */}
-      <div style={{ padding: "0 16px 52px", maxWidth: "1120px", margin: "0 auto" }}>
+      {/* Plans — horizontal scroll */}
+      <div style={{ padding: "0 16px 52px" }}>
         <div style={{
           display: "flex", gap: "14px",
-          overflowX: isMobile ? "auto" : "visible",
-          paddingBottom: isMobile ? "12px" : 0,
-          scrollSnapType: isMobile ? "x mandatory" : "none",
+          overflowX: "auto",
+          paddingBottom: "16px",
+          scrollSnapType: "x mandatory",
           WebkitOverflowScrolling: "touch",
+          maxWidth: "100%",
         }}>
           {PLANS.map(plan => {
             const perMonth = billing==="annual" ? Math.round(plan.priceAnnual/12) : plan.priceMonthly;
@@ -372,9 +373,9 @@ function LandingScreen({ onLogin, onTrial }) {
             const isEnt = plan.id==="enterprise"; const isPro = plan.id==="pro";
             return (
               <div key={plan.id} className="pcard" style={{
-                flex: isMobile ? "0 0 82vw" : "1",
-                minWidth: isMobile ? "82vw" : "220px",
-                maxWidth: isMobile ? "82vw" : "270px",
+                flex: "0 0 200px",
+                minWidth: "200px",
+                maxWidth: isMobile ? "82vw" : "210px",
                 scrollSnapAlign: "start",
                 background: isEnt ? "linear-gradient(160deg,rgba(15,118,110,.3),rgba(15,23,42,.9))" : isPro ? "linear-gradient(160deg,rgba(124,58,237,.2),rgba(15,23,42,.9))" : "rgba(255,255,255,.03)",
                 border: `1px solid ${isEnt?"rgba(45,212,191,.4)":isPro?"rgba(167,139,250,.35)":"rgba(255,255,255,.07)"}`,
@@ -418,7 +419,7 @@ function LandingScreen({ onLogin, onTrial }) {
             );
           })}
         </div>
-        {isMobile && <p style={{ textAlign:"center", color:"#334155", fontSize:".68rem", margin:"6px 0 0" }}>← Deslizá para ver todos los planes →</p>}
+        {<p style={{ textAlign:"center", color:"#334155", fontSize:".68rem", margin:"6px 0 0" }}>← Deslizá para ver todos los planes →</p>}
       </div>
 
       <div style={{ textAlign:"center", color:"#1e293b", fontSize:".65rem", paddingBottom:"28px", letterSpacing:".1em" }}>
