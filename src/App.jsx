@@ -479,6 +479,49 @@ function ReviewsSection() {
   );
 }
 
+// ── Plan buttons: trial + buy monthly/annual ──────────────────────────────────
+function PlanButtons({ plan, onTrial, onNotify }) {
+  const [showBuy, setShowBuy] = useState(false);
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:"7px" }}>
+      {/* Probar gratis */}
+      <button onClick={onTrial} style={{ width:"100%", padding:"11px", borderRadius:"10px", background:`linear-gradient(135deg,${plan.color}99,${plan.color}66)`, border:`1px solid ${plan.accent}66`, color:"#fff", cursor:"pointer", fontFamily:"inherit", fontSize:".82rem", fontWeight:"600", touchAction:"manipulation" }}>
+        🎁 Probar {plan.trialDays} días gratis
+      </button>
+
+      {/* Comprar ahora toggle */}
+      {!showBuy ? (
+        <button onClick={() => setShowBuy(true)} style={{ width:"100%", padding:"9px", borderRadius:"10px", background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.1)", color:"#64748b", cursor:"pointer", fontFamily:"inherit", fontSize:".78rem", touchAction:"manipulation" }}>
+          Comprar ahora ↓
+        </button>
+      ) : (
+        <div style={{ display:"flex", flexDirection:"column", gap:"6px", animation:"fadeIn .2s ease" }}>
+          <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}`}</style>
+          {/* Mensual */}
+          <a href={plan.mpLink} target="_blank" rel="noreferrer"
+            onClick={() => onNotify(null, null, plan.name, "monthly")}
+            style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", padding:"9px", borderRadius:"9px", background:"#009EE3", color:"#fff", textDecoration:"none", fontFamily:"inherit", fontSize:".78rem", fontWeight:"600", touchAction:"manipulation" }}>
+            <MPLogo size={13}/> {fmt(plan.priceMonthly)}/mes
+          </a>
+          {/* Anual */}
+          <a href={plan.mpLink + "?billing=annual"} target="_blank" rel="noreferrer"
+            onClick={() => onNotify(null, null, plan.name, "annual")}
+            style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", padding:"9px", borderRadius:"9px", background:"rgba(0,158,227,.15)", border:"1px solid rgba(0,158,227,.4)", color:"#38bdf8", textDecoration:"none", fontFamily:"inherit", fontSize:".78rem", fontWeight:"600", touchAction:"manipulation" }}>
+            <MPLogo size={13}/> {fmt(plan.priceAnnual)}/año · −15%
+          </a>
+          <div style={{ textAlign:"center", color:"#1e293b", fontSize:".6rem", lineHeight:"1.4" }}>
+            Pagá → ingresá con Google → enviá comprobante a {SUPPORT_EMAIL}
+          </div>
+          <button onClick={() => setShowBuy(false)} style={{ background:"none", border:"none", color:"#334155", cursor:"pointer", fontSize:".68rem", fontFamily:"inherit" }}>
+            ✕ Cerrar
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // LANDING
 // ══════════════════════════════════════════════════════════════════════════════
@@ -571,14 +614,7 @@ function LandingScreen({ onLogin, onTrial }) {
                     Empezar gratis
                   </button>
                 ) : (
-                  <div style={{ display:"flex", flexDirection:"column", gap:"6px" }}>
-                    <a href={plan.mpLink} target="_blank" rel="noreferrer" className="mpbtn"
-                      onClick={() => notifyPaymentAttempt(null, null, plan.name, billing)}
-                      style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"9px", padding:"10px", borderRadius:"10px", background:"#009EE3", color:"#fff", textDecoration:"none", fontFamily:"inherit", fontSize:".8rem", fontWeight:"600", touchAction:"manipulation" }}>
-                      <MPLogo size={15}/><span>Pagar con Mercado Pago</span>
-                    </a>
-                    <div style={{ textAlign:"center", color:"#1e293b", fontSize:".62rem", lineHeight:"1.4" }}>Pagá → ingresá con Google → enviá comprobante a {SUPPORT_EMAIL}</div>
-                  </div>
+                  <PlanButtons plan={plan} onTrial={onTrial} onNotify={notifyPaymentAttempt} />
                 )}
               </div>
             );
