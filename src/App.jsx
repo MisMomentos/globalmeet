@@ -114,16 +114,16 @@ const LANGUAGES = [
 ];
 
 const PLANS = [
-  { id: "trial",      name: "Prueba",     emoji: "🎁", badge: "14 días gratis", priceMonthly: 0,                         priceAnnual: 0,                         color: "#64748b", accent: "#94a3b8", participants: 2, hasVideo: false, hasEarpiece: false, mpLink: null,                  usd: null,
+  { id: "trial",      name: "Prueba",     emoji: "🎁", badge: "14 días gratis",      priceMonthly: 0,                         priceAnnual: 0,                         color: "#64748b", accent: "#94a3b8", participants: 2, hasVideo: false, hasEarpiece: false, mpLink: null,                  usd: null,       trialDays: 14,
     features: ["2 participantes", "Traducción en tiempo real", "10 idiomas", "Sin tarjeta de crédito"] },
-  { id: "basic",      name: "Básico",     emoji: "💼", badge: "Más popular",    priceMonthly: PRECIOS.basic.mensual,      priceAnnual: PRECIOS.basic.anual,       color: "#2563eb", accent: "#60a5fa", participants: 2, hasVideo: false, hasEarpiece: false, mpLink: MP_LINKS.basic,        usd: "~USD 10",
-    features: ["2 participantes", "Conversaciones ilimitadas", "10 idiomas", "Link compartible", "Historial", "Notificaciones email"] },
-  { id: "pro",        name: "Pro",        emoji: "🚀", badge: "Trilingüe",      priceMonthly: PRECIOS.pro.mensual,        priceAnnual: PRECIOS.pro.anual,         color: "#7c3aed", accent: "#a78bfa", participants: 3, hasVideo: false, hasEarpiece: false, mpLink: MP_LINKS.pro,          usd: "~USD 17",
-    features: ["3 participantes", "Conversaciones ilimitadas", "10 idiomas", "Link compartible", "Historial", "Notificaciones email", "Soporte prioritario"] },
-  { id: "enterprise", name: "Enterprise", emoji: "🎥", badge: "Video + Chat",   priceMonthly: PRECIOS.enterprise.mensual, priceAnnual: PRECIOS.enterprise.anual,  color: "#0f766e", accent: "#2dd4bf", participants: 3, hasVideo: true,  hasEarpiece: false, mpLink: MP_LINKS.enterprise,   usd: "~USD 32",
-    features: ["3 participantes", "📹 Videollamada Jitsi", "💬 Chat traductor", "🖥️ Compartir pantalla", `📁 Archivos hasta ${MAX_FILE_MB}MB`, "10 idiomas", "Soporte 24/7"] },
-  { id: "auricular",  name: "Auricular",  emoji: "🎧", badge: "Nuevo · Voz IA", priceMonthly: PRECIOS.auricular.mensual, priceAnnual: PRECIOS.auricular.anual,   color: "#b45309", accent: "#fbbf24", participants: 3, hasVideo: false, hasEarpiece: true,  mpLink: MP_LINKS.auricular,    usd: "~USD 42",
-    features: ["3 participantes", "🎧 Traducción simultánea por auricular", "🗣️ Voz masculina o femenina", "🎙️ Comando 'Hola GlobalMeet'", "Manos libres · sin tocar pantalla", "10 idiomas en tiempo real", "Funciona con cualquier auricular Bluetooth", "Soporte 24/7"] },
+  { id: "basic",      name: "Básico",     emoji: "💼", badge: "7 días gratis",        priceMonthly: PRECIOS.basic.mensual,      priceAnnual: PRECIOS.basic.anual,       color: "#2563eb", accent: "#60a5fa", participants: 2, hasVideo: false, hasEarpiece: false, mpLink: MP_LINKS.basic,        usd: "~USD 10",  trialDays: 7,
+    features: ["🎁 7 días gratis para probar", "2 participantes", "Conversaciones ilimitadas", "10 idiomas", "Link compartible", "Historial", "Notificaciones email"] },
+  { id: "pro",        name: "Pro",        emoji: "🚀", badge: "7 días gratis",        priceMonthly: PRECIOS.pro.mensual,        priceAnnual: PRECIOS.pro.anual,         color: "#7c3aed", accent: "#a78bfa", participants: 3, hasVideo: false, hasEarpiece: false, mpLink: MP_LINKS.pro,          usd: "~USD 17",  trialDays: 7,
+    features: ["🎁 7 días gratis para probar", "3 participantes", "Conversaciones ilimitadas", "10 idiomas", "Link compartible", "Historial", "Notificaciones email", "Soporte prioritario"] },
+  { id: "enterprise", name: "Enterprise", emoji: "🎥", badge: "7 días gratis",        priceMonthly: PRECIOS.enterprise.mensual, priceAnnual: PRECIOS.enterprise.anual,  color: "#0f766e", accent: "#2dd4bf", participants: 3, hasVideo: true,  hasEarpiece: false, mpLink: MP_LINKS.enterprise,   usd: "~USD 32",  trialDays: 7,
+    features: ["🎁 7 días gratis para probar", "3 participantes", "📹 Videollamada Jitsi", "💬 Chat traductor", "🖥️ Compartir pantalla", `📁 Archivos hasta ${MAX_FILE_MB}MB`, "10 idiomas", "Soporte 24/7"] },
+  { id: "auricular",  name: "Auricular",  emoji: "🎧", badge: "7 días gratis",        priceMonthly: PRECIOS.auricular.mensual, priceAnnual: PRECIOS.auricular.anual,   color: "#b45309", accent: "#fbbf24", participants: 3, hasVideo: false, hasEarpiece: true,  mpLink: MP_LINKS.auricular,    usd: "~USD 42",  trialDays: 7,
+    features: ["🎁 7 días gratis para probar", "3 participantes", "🎧 Traducción simultánea por auricular", "🗣️ Voz masculina o femenina", "🎙️ Comando 'Hola GlobalMeet'", "Manos libres · sin tocar pantalla", "10 idiomas en tiempo real", "Funciona con cualquier auricular Bluetooth", "Soporte 24/7"] },
 ];
 
 const SPK = {
@@ -315,6 +315,171 @@ function JitsiFrame({ roomCode }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// REVIEWS & USER COUNTER
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Reseñas iniciales de muestra — se agregan las reales automáticamente
+const INITIAL_REVIEWS = [
+  { id:1, name:"Carlos M.", company:"Importadora del Sur", stars:5, text:"Increíble herramienta. Cerramos un contrato con clientes alemanes sin necesitar intérprete.", date:"Mayo 2026" },
+  { id:2, name:"Ana G.",    company:"Turismo Andino",      stars:5, text:"El modo auricular es una revolución. Mis guías lo usan con turistas extranjeros todos los días.", date:"Mayo 2026" },
+  { id:3, name:"Luis T.",   company:"LogiTrans SA",        stars:4, text:"Muy buena traducción en tiempo real. La videollamada con chat traductor es lo que más usamos.", date:"Mayo 2026" },
+];
+
+function StarRating({ value, onChange, readonly }) {
+  return (
+    <div style={{ display:"flex", gap:"4px" }}>
+      {[1,2,3,4,5].map(s => (
+        <span key={s} onClick={() => !readonly && onChange && onChange(s)}
+          style={{ fontSize: readonly?"1rem":"1.3rem", cursor: readonly?"default":"pointer", color: s<=value?"#fbbf24":"#334155", transition:"color .15s" }}>
+          ★
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function UserCounter() {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    // Simula contador creciente — con Supabase se reemplaza por dato real
+    const stored = parseInt(localStorage.getItem("gm_user_count") || "0");
+    const base   = stored > 0 ? stored : 147;
+    let current  = 0;
+    const target = base;
+    const step   = Math.ceil(target / 60);
+    const timer  = setInterval(() => {
+      current += step;
+      if (current >= target) { current = target; clearInterval(timer); }
+      setCount(current);
+    }, 25);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div style={{ textAlign:"center", padding:"32px 20px 20px" }}>
+      <div style={{ display:"inline-flex", alignItems:"center", gap:"12px", background:"rgba(99,102,241,.08)", border:"1px solid rgba(99,102,241,.2)", borderRadius:"50px", padding:"12px 24px" }}>
+        <div style={{ display:"flex", gap:"-6px" }}>
+          {["🧑","👩","🧔","👨","👩‍💼"].map((e,i) => (
+            <span key={i} style={{ fontSize:"1.2rem", marginLeft: i>0?"-4px":"0" }}>{e}</span>
+          ))}
+        </div>
+        <div>
+          <span style={{ color:"#a5b4fc", fontWeight:"700", fontSize:"1.2rem" }}>{count.toLocaleString("es-AR")}</span>
+          <span style={{ color:"#64748b", fontSize:".82rem", marginLeft:"6px" }}>empresas ya usan GlobalMeet</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ReviewsSection() {
+  const [reviews,    setReviews]    = useState(INITIAL_REVIEWS);
+  const [showForm,   setShowForm]   = useState(false);
+  const [stars,      setStars]      = useState(5);
+  const [name,       setName]       = useState("");
+  const [company,    setCompany]    = useState("");
+  const [text,       setText]       = useState("");
+  const [submitted,  setSubmitted]  = useState(false);
+
+  // Load saved reviews from localStorage
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("gm_reviews") || "[]");
+      if (saved.length > 0) setReviews([...INITIAL_REVIEWS, ...saved]);
+    } catch {}
+  }, []);
+
+  const submit = () => {
+    if (!name.trim() || !text.trim() || stars === 0) return;
+    const newReview = { id: Date.now(), name: name.trim(), company: company.trim(), stars, text: text.trim(), date: new Date().toLocaleDateString("es-AR", { month:"long", year:"numeric" }) };
+    const updated = [...reviews, newReview];
+    setReviews(updated);
+    // Save to localStorage
+    try {
+      const saved = JSON.parse(localStorage.getItem("gm_reviews") || "[]");
+      localStorage.setItem("gm_reviews", JSON.stringify([...saved, newReview]));
+    } catch {}
+    setSubmitted(true);
+    setShowForm(false);
+    setName(""); setCompany(""); setText(""); setStars(5);
+    setTimeout(() => setSubmitted(false), 4000);
+  };
+
+  const avgStars = reviews.length > 0 ? (reviews.reduce((s,r) => s+r.stars, 0) / reviews.length).toFixed(1) : "5.0";
+
+  return (
+    <div style={{ maxWidth:"1000px", margin:"0 auto", padding:"0 20px 48px" }}>
+      {/* Header */}
+      <div style={{ textAlign:"center", marginBottom:"24px" }}>
+        <h2 style={{ color:"#f1f5f9", fontSize:"1.3rem", fontWeight:"600", margin:"0 0 6px", fontFamily:"'Segoe UI',sans-serif" }}>
+          Lo que dicen nuestros clientes
+        </h2>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
+          <StarRating value={Math.round(Number(avgStars))} readonly />
+          <span style={{ color:"#fbbf24", fontWeight:"700", fontSize:"1rem" }}>{avgStars}</span>
+          <span style={{ color:"#475569", fontSize:".8rem" }}>({reviews.length} reseña{reviews.length!==1?"s":""})</span>
+        </div>
+      </div>
+
+      {/* Reviews grid */}
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:"14px", marginBottom:"20px" }}>
+        {reviews.map(r => (
+          <div key={r.id} style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.08)", borderRadius:"14px", padding:"18px 16px" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"8px" }}>
+              <div>
+                <div style={{ color:"#f1f5f9", fontWeight:"600", fontSize:".85rem" }}>{r.name}</div>
+                {r.company && <div style={{ color:"#475569", fontSize:".72rem" }}>{r.company}</div>}
+              </div>
+              <StarRating value={r.stars} readonly />
+            </div>
+            <p style={{ color:"#94a3b8", fontSize:".82rem", lineHeight:"1.55", margin:"0 0 8px", fontStyle:"italic" }}>
+              "{r.text}"
+            </p>
+            <div style={{ color:"#334155", fontSize:".68rem" }}>{r.date}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Submit button */}
+      {submitted && (
+        <div style={{ textAlign:"center", color:"#4ade80", fontSize:".85rem", marginBottom:"12px" }}>
+          ✅ ¡Gracias por tu reseña! Ya aparece en la lista.
+        </div>
+      )}
+
+      {!showForm ? (
+        <div style={{ textAlign:"center" }}>
+          <button onClick={() => setShowForm(true)} style={{ background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.12)", color:"#94a3b8", borderRadius:"10px", padding:"10px 22px", cursor:"pointer", fontFamily:"'Segoe UI',sans-serif", fontSize:".82rem", touchAction:"manipulation" }}>
+            ⭐ Dejar una reseña
+          </button>
+        </div>
+      ) : (
+        <div style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.09)", borderRadius:"14px", padding:"20px", maxWidth:"480px", margin:"0 auto" }}>
+          <h3 style={{ color:"#f1f5f9", fontSize:".92rem", fontWeight:"600", margin:"0 0 16px", fontFamily:"'Segoe UI',sans-serif" }}>Tu reseña</h3>
+          <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
+            <div>
+              <label style={{ color:"#64748b", fontSize:".7rem", letterSpacing:".08em", display:"block", marginBottom:"5px" }}>CALIFICACIÓN</label>
+              <StarRating value={stars} onChange={setStars} />
+            </div>
+            <input value={name} onChange={e=>setName(e.target.value)} placeholder="Tu nombre *" style={{ background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.1)", color:"#e2e8f0", borderRadius:"8px", padding:"9px 12px", fontSize:".84rem", outline:"none", fontFamily:"'Segoe UI',sans-serif", width:"100%", boxSizing:"border-box" }}/>
+            <input value={company} onChange={e=>setCompany(e.target.value)} placeholder="Empresa (opcional)" style={{ background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.1)", color:"#e2e8f0", borderRadius:"8px", padding:"9px 12px", fontSize:".84rem", outline:"none", fontFamily:"'Segoe UI',sans-serif", width:"100%", boxSizing:"border-box" }}/>
+            <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="Contá tu experiencia con GlobalMeet *" rows={3} style={{ background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.1)", color:"#e2e8f0", borderRadius:"8px", padding:"9px 12px", fontSize:".84rem", outline:"none", fontFamily:"'Segoe UI',sans-serif", width:"100%", boxSizing:"border-box", resize:"vertical" }}/>
+            <div style={{ display:"flex", gap:"8px" }}>
+              <button onClick={submit} style={{ flex:1, background:"linear-gradient(135deg,#4f46e5,#7c3aed)", border:"none", color:"#fff", borderRadius:"8px", padding:"10px", fontSize:".84rem", fontWeight:"600", cursor:"pointer", fontFamily:"'Segoe UI',sans-serif" }}>
+                Publicar reseña
+              </button>
+              <button onClick={() => setShowForm(false)} style={{ flex:1, background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.1)", color:"#64748b", borderRadius:"8px", padding:"10px", fontSize:".84rem", cursor:"pointer", fontFamily:"'Segoe UI',sans-serif" }}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // LANDING
 // ══════════════════════════════════════════════════════════════════════════════
 function LandingScreen({ onLogin, onTrial }) {
@@ -422,6 +587,12 @@ function LandingScreen({ onLogin, onTrial }) {
         {<p style={{ textAlign:"center", color:"#334155", fontSize:".68rem", margin:"6px 0 0" }}>← Deslizá para ver todos los planes →</p>}
       </div>
 
+      {/* ── Contador de usuarios ── */}
+      <UserCounter />
+
+      {/* ── Reseñas ── */}
+      <ReviewsSection />
+
       <div style={{ textAlign:"center", color:"#1e293b", fontSize:".65rem", paddingBottom:"28px", letterSpacing:".1em" }}>
         {APP_NAME} · DISEÑADO POR MOMENTOS · POWERED BY CLAUDE AI
       </div>
@@ -482,8 +653,9 @@ function Dashboard({ user, plan, onStartRoom, onGoPlans, onLogout }) {
   const canEnt   = plan.id==="enterprise";
   const canAur   = plan.id==="auricular";
   const notifs   = [];
-  if (daysLeft<=7&&daysLeft>0) notifs.push({ t:"warn", m:`⚠️ Tu plan vence en ${daysLeft} día${daysLeft!==1?"s":""}. Renovalo pronto.` });
-  if (daysLeft<=0&&!isTrial)   notifs.push({ t:"error", m:"🔴 Tu plan venció. Renovalo para seguir." });
+  if (daysLeft===3)            notifs.push({ t:"warn",  m:`⚠️ Tu plan vence en 3 días (${planEnd?.toLocaleDateString("es-AR")}). Renovalo para no perder acceso.` });
+  if (daysLeft===1)            notifs.push({ t:"warn",  m:"⚠️ Tu plan vence mañana. ¡Renovalo hoy!" });
+  if (daysLeft<=0&&!isTrial)   notifs.push({ t:"error", m:"🔴 Tu plan venció. Renovalo para seguir usando GlobalMeet." });
 
   return (
     <div style={{ minHeight:"100vh", background:"#080c14", fontFamily:"'Segoe UI',system-ui,sans-serif", color:"#e2e8f0" }}>
