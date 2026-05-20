@@ -1651,11 +1651,17 @@ export default function App() {
   const [hasEarpiece, setHasEarpiece] = useState(false);
   const [chatCfg,     setChatCfg]     = useState(null);
 
-  // Detectar sesión existente al cargar
+  // Detectar sesión existente al cargar y manejar redirect de sala
   useEffect(() => {
+    // Detectar si hay un código de sala en la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomCode  = urlParams.get("room");
+    if (roomCode) {
+      try { localStorage.setItem("gm_pending_room", roomCode); } catch {}
+    }
+
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        // Recargar datos del usuario desde Supabase
         const { data: userData } = await supabase
           .from("users").select("*").eq("id", session.user.id).single();
         if (userData) {
@@ -1668,7 +1674,17 @@ export default function App() {
             joinedAt: new Date(userData.created_at),
           });
           setPlan({ id: userData.plan_id || "trial" });
-          setScreen("dashboard");
+
+          // Si hay sala pendiente, ir directo
+          const pendingRoom = localStorage.getItem("gm_pending_room");
+          if (pendingRoom) {
+            localStorage.removeItem("gm_pending_room");
+            // Mostrar setup de sala con ese código
+            setChatCfg({ roomCode: pendingRoom, count: 2, hasVideo: false, hasEarpiece: false, names: { A: userData.name, B: "Participante B" }, langs: { A: "es", B: "en" } });
+            setScreen("roomSetup");
+          } else {
+            setScreen("dashboard");
+          }
         }
       }
     });
@@ -1684,6 +1700,18 @@ export default function App() {
 
     setUser({ ...u, joinedAt: u.joinedAt || new Date() });
     setPlan({ id: u.planId || selectedPlan });
+
+    // Si hay sala pendiente, ir directo a la sala
+    try {
+      const pendingRoom = localStorage.getItem("gm_pending_room");
+      if (pendingRoom) {
+        localStorage.removeItem("gm_pending_room");
+        setChatCfg({ roomCode: pendingRoom, count: 2, hasVideo: false, hasEarpiece: false, names: { A: u.name, B: "Participante B" }, langs: { A: "es", B: "en" } });
+        setScreen("roomSetup");
+        return;
+      }
+    } catch {}
+
     setScreen("dashboard");
   };
 
