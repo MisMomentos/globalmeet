@@ -491,8 +491,6 @@ function PlanButtons({ plan, onTrial, onNotify }) {
   const [showBuy, setShowBuy] = useState(false);
 
   const handleTrial = () => {
-    // Guardar el plan elegido antes de ir al login
-    try { localStorage.setItem("gm_selected_plan", plan.id); } catch {}
     onTrial();
   };
 
@@ -626,8 +624,17 @@ function SecuritySection() {
 // ══════════════════════════════════════════════════════════════════════════════
 // LANDING
 // ══════════════════════════════════════════════════════════════════════════════
-function LandingScreen({ onLogin, onTrial }) {
+function LandingScreen({ onLogin, onTrial, onChangePlan, isLoggedIn }) {
   const [billing, setBilling] = useState("monthly");
+
+  const handleTrial = (planId) => {
+    if (isLoggedIn && onChangePlan) {
+      // Usuario ya logueado — cambiar plan directo
+      onChangePlan(planId);
+    } else {
+      onTrial(planId);
+    }
+  };
   const { isMobile } = useBreakpoint();
 
   return (
@@ -711,11 +718,11 @@ function LandingScreen({ onLogin, onTrial }) {
                   {plan.features.map((f,i) => <li key={i} style={{ display:"flex", gap:"6px", fontSize:".75rem", color:"#94a3b8", lineHeight:"1.4" }}><span style={{ color:plan.accent, flexShrink:0 }}>✓</span>{f}</li>)}
                 </ul>
                 {plan.priceMonthly===0 ? (
-                  <button onClick={onTrial} style={{ width:"100%", padding:"11px", borderRadius:"10px", background:"rgba(255,255,255,.07)", border:"1px solid rgba(255,255,255,.12)", color:"#94a3b8", cursor:"pointer", fontFamily:"inherit", fontSize:".82rem", fontWeight:"600", touchAction:"manipulation" }}>
+                  <button onClick={() => handleTrial("trial")} style={{ width:"100%", padding:"11px", borderRadius:"10px", background:"rgba(255,255,255,.07)", border:"1px solid rgba(255,255,255,.12)", color:"#94a3b8", cursor:"pointer", fontFamily:"inherit", fontSize:".82rem", fontWeight:"600", touchAction:"manipulation" }}>
                     Empezar gratis
                   </button>
                 ) : (
-                  <PlanButtons plan={plan} onTrial={onTrial} onNotify={notifyPaymentAttempt} />
+                  <PlanButtons plan={plan} onTrial={() => handleTrial(plan.id)} onNotify={notifyPaymentAttempt} />
                 )}
               </div>
             );
@@ -764,6 +771,8 @@ function LoginScreen({ onLogin }) {
 
   const handleSession = async (authUser) => {
     setLoading(true);
+    // Limpiar el historial para que el botón "atrás" funcione bien
+    try { window.history.replaceState({}, document.title, window.location.pathname); } catch {}
     try {
       // Buscar o crear usuario en la tabla users
       const { data: existing } = await supabase
@@ -1644,8 +1653,24 @@ export default function App() {
 
   // Detectar sesión existente al cargar
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session && screen === "dashboard") setScreen("landing");
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        // Recargar datos del usuario desde Supabase
+        const { data: userData } = await supabase
+          .from("users").select("*").eq("id", session.user.id).single();
+        if (userData) {
+          setUser({
+            id:       userData.id,
+            email:    userData.email,
+            name:     userData.name,
+            planId:   userData.plan_id,
+            planEnd:  new Date(userData.plan_end),
+            joinedAt: new Date(userData.created_at),
+          });
+          setPlan({ id: userData.plan_id || "trial" });
+          setScreen("dashboard");
+        }
+      }
     });
   }, []);
 
@@ -1666,7 +1691,21 @@ export default function App() {
     await supabase.auth.signOut();
     setUser(null);
     setPlan({ id: "trial" });
+    window.history.replaceState({}, document.title, "/");
     setScreen("landing");
+  };
+
+  // Cambiar plan — actualiza en Supabase y en el estado local
+  const handleChangePlan = async (newPlanId) => {
+    if (!user?.id) { setScreen("landing"); return; }
+    const planDays = newPlanId === "trial" ? 14 : 7;
+    const planEnd  = new Date(Date.now() + planDays * 86400000).toISOString();
+    await supabase.from("users").update({
+      plan_id:  newPlanId,
+      plan_end: planEnd,
+    }).eq("id", user.id);
+    setPlan({ id: newPlanId });
+    setScreen("dashboard");
   };
 
   const handleStart = (count, video, earpiece) => {
@@ -1682,7 +1721,7 @@ export default function App() {
     else setScreen("chat");
   };
 
-  if (screen === "landing")      return <LandingScreen onLogin={() => setScreen("login")} onTrial={() => setScreen("login")} />;
+  if (screen === "landing")      return <LandingScreen onLogin={() => setScreen("login")} onTrial={(planId) => { if (planId) { try { localStorage.setItem("gm_selected_plan", planId); } catch {} } setScreen("login"); }} onChangePlan={handleChangePlan} isLoggedIn={!!user} />;
   if (screen === "login")        return <LoginScreen onLogin={handleLogin} />;
   if (screen === "trialExpired") return <TrialExpiredWall onGoPlans={() => setScreen("landing")} />;
   if (screen === "dashboard")    return <Dashboard user={user} plan={plan} onStartRoom={handleStart} onGoPlans={() => setScreen("landing")} onLogout={handleLogout} />;
