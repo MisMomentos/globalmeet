@@ -1,12 +1,19 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { createClient } from "@supabase/supabase-js";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ✏️  CONFIGURACIÓN — editá estos valores
 // ═══════════════════════════════════════════════════════════════════════════
-const APP_NAME     = "GlobalMeet";
-const APP_SLOGAN   = "Reuniones sin fronteras · Traducción simultánea";
+const APP_NAME      = "GlobalMeet";
+const APP_SLOGAN    = "Reuniones sin fronteras · Traducción simultánea";
 const SUPPORT_EMAIL = "germanmomentos@gmail.com";
-const MAX_FILE_MB  = 48;
+const MAX_FILE_MB   = 48;
+
+// ✏️  SUPABASE — credenciales del proyecto
+const SUPABASE_URL = "https://jiwsoabsnivzowrjmcbq.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Vit2nDXpBZlgDXOnTWCvEQ_I4jnOdOC";
+const supabase     = createClient(SUPABASE_URL, SUPABASE_KEY);
+// ═══════════════════════════════════════════════════════════════════════════
 
 const PRECIOS = {
   basic:      { mensual: 14900, anual: 143040  },
@@ -637,16 +644,83 @@ function LandingScreen({ onLogin, onTrial }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// LOGIN
+// LOGIN — Google Auth real con Supabase
 // ══════════════════════════════════════════════════════════════════════════════
 function LoginScreen({ onLogin }) {
-  const [email,setEmail]=useState(""); const [name,setName]=useState(""); const [step,setStep]=useState("form"); const [err,setErr]=useState("");
-  const go = () => {
-    if (!name.trim()) { setErr("Ingresá tu nombre."); return; }
-    if (!email.includes("@")||!email.includes(".")) { setErr("Email inválido."); return; }
-    setErr(""); setStep("loading");
-    setTimeout(() => onLogin({ email: email.trim().toLowerCase(), name: name.trim() }), 1400);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
+
+  // Detectar sesión al volver del redirect de Google
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        await handleSession(session.user);
+      }
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        await handleSession(session.user);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSession = async (authUser) => {
+    setLoading(true);
+    try {
+      // Buscar o crear usuario en la tabla users
+      const { data: existing } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", authUser.id)
+        .single();
+
+      if (!existing) {
+        // Usuario nuevo — crear con plan trial
+        await supabase.from("users").insert({
+          id:         authUser.id,
+          email:      authUser.email,
+          name:       authUser.user_metadata?.full_name || authUser.email.split("@")[0],
+          plan_id:    "trial",
+          billing:    "monthly",
+          plan_end:   new Date(Date.now() + 14 * 86400000).toISOString(),
+          is_active:  true,
+        });
+      }
+
+      const userData = existing || {
+        id:        authUser.id,
+        email:     authUser.email,
+        name:      authUser.user_metadata?.full_name || authUser.email.split("@")[0],
+        plan_id:   "trial",
+        plan_end:  new Date(Date.now() + 14 * 86400000).toISOString(),
+      };
+
+      onLogin({
+        id:        userData.id,
+        email:     userData.email,
+        name:      userData.name,
+        planId:    userData.plan_id,
+        planEnd:   new Date(userData.plan_end),
+        joinedAt:  new Date(userData.created_at || Date.now()),
+      });
+    } catch (e) {
+      setErr("Error al iniciar sesión. Intentá de nuevo.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleGoogle = async () => {
+    setLoading(true);
+    setErr("");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.href },
+    });
+    if (error) { setErr("Error al conectar con Google."); setLoading(false); }
+  };
+
   return (
     <div style={{ minHeight:"100vh", background:"#080c14", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Segoe UI',system-ui,sans-serif", padding:"20px" }}>
       <div style={{ width:"100%", maxWidth:"380px", background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.09)", borderRadius:"20px", padding:"32px 24px", boxShadow:"0 25px 60px rgba(0,0,0,.6)" }}>
@@ -654,21 +728,19 @@ function LoginScreen({ onLogin }) {
           <div style={{ display:"flex", justifyContent:"center", marginBottom:"12px" }}><AppLogo size={48} withText /></div>
           <p style={{ color:"#475569", fontSize:".8rem", margin:0 }}>Ingresá con tu cuenta Google</p>
         </div>
-        {step==="loading" ? (
+        {err && <div style={{ background:"rgba(239,68,68,.1)", border:"1px solid rgba(239,68,68,.3)", borderRadius:"8px", padding:"8px 12px", color:"#fca5a5", fontSize:".76rem", marginBottom:"12px" }}>⚠️ {err}</div>}
+        {loading ? (
           <div style={{ textAlign:"center", padding:"20px 0", color:"#64748b" }}>
             <div style={{ fontSize:"1.4rem", marginBottom:"8px" }}>⏳</div>
-            <div style={{ fontSize:".84rem" }}>Verificando…</div>
+            <div style={{ fontSize:".84rem" }}>Conectando con Google…</div>
           </div>
         ) : (
-          <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
-            {err && <div style={{ background:"rgba(239,68,68,.1)", border:"1px solid rgba(239,68,68,.3)", borderRadius:"8px", padding:"8px 12px", color:"#fca5a5", fontSize:".76rem" }}>⚠️ {err}</div>}
-            <input value={name} onChange={e=>setName(e.target.value)} placeholder="Tu nombre completo" style={inputSt} />
-            <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="tu@gmail.com" type="email" style={inputSt} onKeyDown={e=>e.key==="Enter"&&go()} />
-            <button onClick={go} style={{ background:"linear-gradient(135deg,#4285f4,#34a853)", border:"none", color:"#fff", borderRadius:"10px", padding:"13px", fontSize:".9rem", fontWeight:"600", cursor:"pointer", fontFamily:"inherit", touchAction:"manipulation" }}>
-              <span style={{ fontWeight:"900" }}>G</span>  Continuar con Google
+          <>
+            <button onClick={handleGoogle} style={{ width:"100%", background:"linear-gradient(135deg,#4285f4,#34a853)", border:"none", color:"#fff", borderRadius:"10px", padding:"13px", fontSize:".9rem", fontWeight:"600", cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", touchAction:"manipulation" }}>
+              <span style={{ fontWeight:"900", fontSize:"1rem" }}>G</span> Continuar con Google
             </button>
-            <p style={{ color:"#1e293b", fontSize:".68rem", textAlign:"center", margin:0 }}>Solo ingresás una vez · Sesión recordada</p>
-          </div>
+            <p style={{ color:"#1e293b", fontSize:".68rem", textAlign:"center", margin:"12px 0 0" }}>Solo ingresás una vez · Sesión recordada</p>
+          </>
         )}
         <div style={{ textAlign:"center", color:"#1e293b", fontSize:".62rem", marginTop:"16px", letterSpacing:".08em" }}>DISEÑADO POR MOMENTOS</div>
       </div>
@@ -836,71 +908,105 @@ function RoomSetup({ count, hasVideo, hasEarpiece, user, onStart, onBack }) {
 // CHAT LOGIC HOOK
 // ══════════════════════════════════════════════════════════════════════════════
 function useChatLogic(config) {
-  const [messages, setMessages]   = useState([]);
+  const [messages,  setMessages]  = useState([]);
   const [activeSpk, setActiveSpk] = useState(null);
-  const [interims, setInterims]   = useState({ A:"", B:"", C:"" });
+  const [interims,  setInterims]  = useState({ A:"", B:"", C:"" });
   const recRef = useRef(null);
   const participants = ["A","B",...(config.count===3?["C"]:[])];
 
+  // Supabase Realtime — sync entre dispositivos
   useEffect(() => {
-    const handler = e => {
-      if (e.key===`room_${config.roomCode}`) {
-        try {
-          const data=JSON.parse(e.newValue);
-          if (data?.msg) setMessages(prev => {
-            const ex=prev.find(m=>m.id===data.msg.id);
-            return ex ? prev.map(m=>m.id===data.msg.id?{...m,...data.msg}:m) : [...prev,data.msg];
-          });
-        } catch {}
-      }
-    };
-    window.addEventListener("storage",handler);
-    return ()=>window.removeEventListener("storage",handler);
-  },[config.roomCode]);
+    // Cargar mensajes existentes de la sala
+    supabase.from("messages").select("*")
+      .eq("room_code", config.roomCode)
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        if (data) setMessages(data.map(m => ({
+          id: m.id, speaker: m.speaker, speakerName: m.speaker_name,
+          speakerFlag: m.speaker_flag, original: m.original,
+          translations: m.translations || {}, targetLangs: m.target_langs || {},
+          time: new Date(m.created_at).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }),
+        })));
+      });
 
-  const broadcast = msg => { try { localStorage.setItem(`room_${config.roomCode}`,JSON.stringify({msg,ts:Date.now()})); } catch {} };
+    // Escuchar mensajes nuevos en tiempo real
+    const channel = supabase.channel(`room:${config.roomCode}`)
+      .on("postgres_changes", { event:"*", schema:"public", table:"messages", filter:`room_code=eq.${config.roomCode}` },
+        (payload) => {
+          const m = payload.new;
+          if (!m) return;
+          const msg = {
+            id: m.id, speaker: m.speaker, speakerName: m.speaker_name,
+            speakerFlag: m.speaker_flag, original: m.original,
+            translations: m.translations || {}, targetLangs: m.target_langs || {},
+            time: new Date(m.created_at).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }),
+          };
+          if (payload.eventType === "INSERT") {
+            setMessages(prev => prev.find(x => x.id === msg.id) ? prev : [...prev, msg]);
+          } else if (payload.eventType === "UPDATE") {
+            setMessages(prev => prev.map(x => x.id === msg.id ? { ...x, ...msg } : x));
+          }
+        }
+      ).subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [config.roomCode]);
 
   const submitText = useCallback(async (spk, text) => {
     if (!text.trim()) return;
-    const myLang=LANGUAGES.find(l=>l.code===config.langs[spk]);
-    const others=participants.filter(p=>p!==spk);
-    const otherLangs=Object.fromEntries(others.map(p=>[p,LANGUAGES.find(l=>l.code===config.langs[p])]));
-    const id=Date.now(); const init=Object.fromEntries(others.map(p=>[p,""]));
-    const msg={id,speaker:spk,speakerName:config.names[spk],speakerFlag:myLang?.flag,original:text.trim(),translations:init,targetLangs:otherLangs,time:nowTime(),translating:true};
-    setMessages(prev=>[...prev,msg]); broadcast(msg);
-    await Promise.all(others.map(async p=>{
-      const t=await claudeTranslate(text.trim(),myLang?.label,otherLangs[p]?.label);
-      const upd={...msg,translations:{...msg.translations,[p]:t},translating:false};
-      setMessages(prev=>prev.map(m=>m.id===id?upd:m)); broadcast(upd);
+    const myLang     = LANGUAGES.find(l => l.code === config.langs[spk]);
+    const others     = participants.filter(p => p !== spk);
+    const otherLangs = Object.fromEntries(others.map(p => [p, LANGUAGES.find(l => l.code === config.langs[p])]));
+
+    // Insertar en Supabase
+    const { data: inserted } = await supabase.from("messages").insert({
+      room_code:    config.roomCode,
+      speaker:      spk,
+      speaker_name: config.names[spk],
+      speaker_flag: myLang?.flag,
+      original:     text.trim(),
+      translations: {},
+      target_langs: Object.fromEntries(others.map(p => [p, { flag: otherLangs[p]?.flag, label: otherLangs[p]?.label }])),
+    }).select().single();
+
+    if (!inserted) return;
+
+    // Traducir y actualizar
+    const translations = {};
+    await Promise.all(others.map(async p => {
+      const t = await claudeTranslate(text.trim(), myLang?.label, otherLangs[p]?.label);
+      translations[p] = t;
     }));
-  },[config,participants]);
+
+    await supabase.from("messages").update({ translations }).eq("id", inserted.id);
+  }, [config, participants]);
 
   const toggleMic = useCallback(async spk => {
     if (!BROWSER.micOk) return;
     if (activeSpk) { recRef.current?.stop(); return; }
-    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    const rec=new SR();
-    rec.lang=LANGUAGES.find(l=>l.code===config.langs[spk])?.bcp??"es-ES";
-    rec.continuous=true; rec.interimResults=true;
-    let final="";
-    rec.onstart=()=>setActiveSpk(spk);
-    rec.onerror=()=>{ setActiveSpk(null); setInterims(p=>({...p,[spk]:""})); };
-    rec.onresult=e=>{
-      let interim=""; final="";
-      for(let i=e.resultIndex;i<e.results.length;i++){
-        if(e.results[i].isFinal) final+=e.results[i][0].transcript+" ";
-        else interim+=e.results[i][0].transcript;
+    const SR  = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const rec = new SR();
+    rec.lang = LANGUAGES.find(l => l.code === config.langs[spk])?.bcp ?? "es-ES";
+    rec.continuous = true; rec.interimResults = true;
+    let final = "";
+    rec.onstart  = () => setActiveSpk(spk);
+    rec.onerror  = () => { setActiveSpk(null); setInterims(p => ({ ...p, [spk]:"" })); };
+    rec.onresult = e => {
+      let interim = ""; final = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript + " ";
+        else interim += e.results[i][0].transcript;
       }
-      setInterims(p=>({...p,[spk]:interim||final}));
+      setInterims(p => ({ ...p, [spk]: interim || final }));
     };
-    rec.onend=async()=>{
-      setActiveSpk(null); setInterims(p=>({...p,[spk]:""}));
-      if (final.trim()) await submitText(spk,final.trim());
+    rec.onend = async () => {
+      setActiveSpk(null); setInterims(p => ({ ...p, [spk]:"" }));
+      if (final.trim()) await submitText(spk, final.trim());
     };
-    recRef.current=rec; rec.start();
-  },[activeSpk,config,submitText]);
+    recRef.current = rec; rec.start();
+  }, [activeSpk, config, submitText]);
 
-  return {messages,activeSpk,interims,participants,toggleMic,submitText};
+  return { messages, activeSpk, interims, participants, toggleMic, submitText };
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1431,20 +1537,40 @@ function EarpieceRoom({ config, onBack }) {
 // ROOT
 // ══════════════════════════════════════════════════════════════════════════════
 export default function App() {
-  const [screen,    setScreen]    = useState("landing");
-  const [user,      setUser]      = useState(null);
-  const [plan,      setPlan]      = useState({ id:"trial" });
-  const [roomCount, setRoomCount] = useState(2);
-  const [hasVideo,  setHasVideo]  = useState(false);
+  const [screen,      setScreen]      = useState("landing");
+  const [user,        setUser]        = useState(null);
+  const [plan,        setPlan]        = useState({ id:"trial" });
+  const [roomCount,   setRoomCount]   = useState(2);
+  const [hasVideo,    setHasVideo]    = useState(false);
   const [hasEarpiece, setHasEarpiece] = useState(false);
-  const [chatCfg,   setChatCfg]   = useState(null);
+  const [chatCfg,     setChatCfg]     = useState(null);
 
-  const handleLogin = u => { setUser({...u,joinedAt:new Date()}); setScreen("dashboard"); };
+  // Detectar sesión existente al cargar
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session && screen === "dashboard") setScreen("landing");
+    });
+  }, []);
+
+  const handleLogin = u => {
+    setUser({ ...u, joinedAt: u.joinedAt || new Date() });
+    setPlan({ id: u.planId || "trial" });
+    setScreen("dashboard");
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setPlan({ id: "trial" });
+    setScreen("landing");
+  };
+
   const handleStart = (count, video, earpiece) => {
-    if (plan.id==="trial"&&isTrialExpired(user)) { setScreen("trialExpired"); return; }
+    if (plan.id === "trial" && isTrialExpired(user)) { setScreen("trialExpired"); return; }
     setRoomCount(count); setHasVideo(video); setHasEarpiece(earpiece || false);
     setScreen("roomSetup");
   };
+
   const handleLaunch = cfg => {
     setChatCfg(cfg);
     if (cfg.hasEarpiece) setScreen("earpiece");
@@ -1452,13 +1578,13 @@ export default function App() {
     else setScreen("chat");
   };
 
-  if (screen==="landing")      return <LandingScreen onLogin={()=>setScreen("login")} onTrial={()=>setScreen("login")}/>;
-  if (screen==="login")        return <LoginScreen onLogin={handleLogin}/>;
-  if (screen==="trialExpired") return <TrialExpiredWall onGoPlans={()=>setScreen("landing")}/>;
-  if (screen==="dashboard")    return <Dashboard user={user} plan={plan} onStartRoom={handleStart} onGoPlans={()=>setScreen("landing")} onLogout={()=>{setUser(null);setScreen("landing");}}/>;
-  if (screen==="roomSetup")    return <RoomSetup count={roomCount} hasVideo={hasVideo} hasEarpiece={hasEarpiece} user={user} onStart={handleLaunch} onBack={()=>setScreen("dashboard")}/>;
-  if (screen==="chat")         return <ChatRoom config={chatCfg} onBack={()=>setScreen("dashboard")}/>;
-  if (screen==="enterprise")   return <EnterpriseRoom config={chatCfg} onBack={()=>setScreen("dashboard")}/>;
-  if (screen==="earpiece")     return <EarpieceRoom config={chatCfg} onBack={()=>setScreen("dashboard")}/>;
+  if (screen === "landing")      return <LandingScreen onLogin={() => setScreen("login")} onTrial={() => setScreen("login")} />;
+  if (screen === "login")        return <LoginScreen onLogin={handleLogin} />;
+  if (screen === "trialExpired") return <TrialExpiredWall onGoPlans={() => setScreen("landing")} />;
+  if (screen === "dashboard")    return <Dashboard user={user} plan={plan} onStartRoom={handleStart} onGoPlans={() => setScreen("landing")} onLogout={handleLogout} />;
+  if (screen === "roomSetup")    return <RoomSetup count={roomCount} hasVideo={hasVideo} hasEarpiece={hasEarpiece} user={user} onStart={handleLaunch} onBack={() => setScreen("dashboard")} />;
+  if (screen === "chat")         return <ChatRoom config={chatCfg} onBack={() => setScreen("dashboard")} />;
+  if (screen === "enterprise")   return <EnterpriseRoom config={chatCfg} onBack={() => setScreen("dashboard")} />;
+  if (screen === "earpiece")     return <EarpieceRoom config={chatCfg} onBack={() => setScreen("dashboard")} />;
   return null;
 }
