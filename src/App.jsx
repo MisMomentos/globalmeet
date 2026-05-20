@@ -11,7 +11,7 @@ const MAX_FILE_MB   = 48;
 
 // ✏️  SUPABASE — credenciales del proyecto
 const SUPABASE_URL = "https://jiwsoabsnivzowrjmcbq.supabase.co";
-const SUPABASE_KEY = "sb_publishable_Vit2nDXpBZlgDXOnTWCvEQ_I4jnOdOC";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imppd3NvYWJzbml2em93cmptY2JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMjMyODcsImV4cCI6MjA5NDc5OTI4N30.gmcS7NXO7LDo9KbyiPVHoQpwtYLjJMJDI9XYAIsG_ag";
 const supabase     = createClient(SUPABASE_URL, SUPABASE_KEY);
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -530,6 +530,96 @@ function PlanButtons({ plan, onTrial, onNotify }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// SECURITY SECTION
+// ══════════════════════════════════════════════════════════════════════════════
+function SecuritySection() {
+  const checks = [
+    { icon:"🔒", label:"HTTPS / SSL",          gm:true,  zoom:true,  meet:true,  whatsapp:true  },
+    { icon:"🔑", label:"Login con Google OAuth", gm:true,  zoom:true,  meet:true,  whatsapp:false },
+    { icon:"🛡️", label:"Datos encriptados",      gm:true,  zoom:true,  meet:true,  whatsapp:true  },
+    { icon:"🗄️", label:"Base de datos segura",   gm:true,  zoom:false, meet:true,  whatsapp:false },
+    { icon:"🚫", label:"Sin venta de datos",      gm:true,  zoom:false, meet:false, whatsapp:false },
+    { icon:"🇦🇷", label:"Servidor en Sudamérica", gm:true,  zoom:false, meet:false, whatsapp:false },
+    { icon:"🤖", label:"IA empresarial (Claude)", gm:true,  zoom:false, meet:false, whatsapp:false },
+    { icon:"👁️", label:"Sin publicidad",          gm:true,  zoom:false, meet:false, whatsapp:true  },
+  ];
+
+  const competitors = [
+    { name:"GlobalMeet", color:"#4f46e5", accent:"#a5b4fc", isUs:true  },
+    { name:"Zoom",       color:"#2d8cff", accent:"#93c5fd", isUs:false },
+    { name:"Meet",       color:"#34a853", accent:"#86efac", isUs:false },
+    { name:"WhatsApp",   color:"#25d366", accent:"#86efac", isUs:false },
+  ];
+
+  return (
+    <div style={{ maxWidth:"900px", margin:"0 auto", padding:"0 20px 52px", fontFamily:"'Segoe UI',system-ui,sans-serif" }}>
+      <div style={{ textAlign:"center", marginBottom:"28px" }}>
+        <div style={{ display:"inline-flex", alignItems:"center", gap:"8px", background:"rgba(79,70,229,.08)", border:"1px solid rgba(99,102,241,.2)", borderRadius:"50px", padding:"8px 18px", marginBottom:"14px" }}>
+          <span style={{ fontSize:"1rem" }}>🔒</span>
+          <span style={{ color:"#a5b4fc", fontSize:".78rem", fontWeight:"600", letterSpacing:".1em" }}>SEGURIDAD DE NIVEL EMPRESARIAL</span>
+        </div>
+        <h2 style={{ color:"#f1f5f9", fontSize:"1.3rem", fontWeight:"600", margin:"0 0 6px" }}>
+          ¿Por qué GlobalMeet es más seguro?
+        </h2>
+        <p style={{ color:"#475569", fontSize:".82rem", margin:0 }}>Comparativa con las apps más usadas del mercado</p>
+      </div>
+
+      {/* Table */}
+      <div style={{ overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
+        <table style={{ width:"100%", borderCollapse:"collapse", minWidth:"480px" }}>
+          <thead>
+            <tr>
+              <th style={{ textAlign:"left", padding:"10px 14px", color:"#475569", fontSize:".7rem", letterSpacing:".1em", textTransform:"uppercase", borderBottom:"1px solid rgba(255,255,255,.07)", width:"40%" }}>
+                Característica
+              </th>
+              {competitors.map(c => (
+                <th key={c.name} style={{ padding:"10px 8px", textAlign:"center", borderBottom:`2px solid ${c.isUs?"rgba(99,102,241,.5)":"rgba(255,255,255,.07)"}`, background:c.isUs?"rgba(79,70,229,.08)":"transparent", fontSize:".72rem", fontWeight:"700", color:c.isUs?c.accent:"#64748b", borderRadius:c.isUs?"8px 8px 0 0":0 }}>
+                  {c.isUs && <span style={{ display:"block", fontSize:".58rem", background:"linear-gradient(135deg,#4f46e5,#7c3aed)", color:"#fff", borderRadius:"20px", padding:"1px 8px", marginBottom:"3px", letterSpacing:".08em" }}>⭐ NOSOTROS</span>}
+                  {c.name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {checks.map((row, ri) => (
+              <tr key={ri} style={{ borderBottom:"1px solid rgba(255,255,255,.04)" }}>
+                <td style={{ padding:"10px 14px", color:"#94a3b8", fontSize:".8rem", display:"flex", alignItems:"center", gap:"8px" }}>
+                  <span>{row.icon}</span>{row.label}
+                </td>
+                {[row.gm, row.zoom, row.meet, row.whatsapp].map((val, ci) => (
+                  <td key={ci} style={{ padding:"10px 8px", textAlign:"center", background:ci===0?"rgba(79,70,229,.05)":"transparent" }}>
+                    {val
+                      ? <span style={{ color:"#4ade80", fontSize:"1.1rem" }}>✓</span>
+                      : <span style={{ color:"#ef4444", fontSize:"1rem" }}>✗</span>
+                    }
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Badges */}
+      <div style={{ display:"flex", gap:"10px", flexWrap:"wrap", justifyContent:"center", marginTop:"20px" }}>
+        {[
+          { icon:"🔒", label:"SSL 256-bit" },
+          { icon:"🛡️", label:"OAuth 2.0" },
+          { icon:"🗄️", label:"Supabase RLS" },
+          { icon:"🤖", label:"Claude AI" },
+          { icon:"🇦🇷", label:"São Paulo" },
+        ].map((b,i) => (
+          <div key={i} style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.08)", borderRadius:"20px", padding:"6px 14px", display:"flex", alignItems:"center", gap:"6px" }}>
+            <span style={{ fontSize:".9rem" }}>{b.icon}</span>
+            <span style={{ color:"#64748b", fontSize:".72rem", fontWeight:"600" }}>{b.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // LANDING
 // ══════════════════════════════════════════════════════════════════════════════
 function LandingScreen({ onLogin, onTrial }) {
@@ -632,6 +722,9 @@ function LandingScreen({ onLogin, onTrial }) {
 
       {/* ── Contador de usuarios ── */}
       <UserCounter />
+
+      {/* ── Seguridad ── */}
+      <SecuritySection />
 
       {/* ── Reseñas ── */}
       <ReviewsSection />
