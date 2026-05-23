@@ -37,9 +37,9 @@ const MP_LINKS = {
 // Registrate en emailjs.com, creá un servicio Gmail y una plantilla.
 // La plantilla debe tener estas variables: {{user_email}}, {{user_name}},
 // {{plan_name}}, {{billing}}, {{timestamp}}, {{admin_url}}
-const EMAILJS_SERVICE_ID  = "TU_SERVICE_ID";   // ← de emailjs.com
-const EMAILJS_TEMPLATE_ID = "TU_TEMPLATE_ID";  // ← de emailjs.com
-const EMAILJS_PUBLIC_KEY  = "TU_PUBLIC_KEY";   // ← de emailjs.com
+const EMAILJS_SERVICE_ID  = "service_gceoy9u";
+const EMAILJS_TEMPLATE_ID = "template_g2x38tk";
+const EMAILJS_PUBLIC_KEY  = "_MXZhHgxYxIAKIHFk";
 
 // ── Notificación cuando alguien hace clic en Pagar ────────────────────────────
 async function notifyPaymentAttempt(userEmail, userName, planName, billing) {
@@ -490,12 +490,40 @@ function ReviewsSection() {
   );
 }
 
-// ── Plan buttons: trial + buy monthly/annual ──────────────────────────────────
-function PlanButtons({ plan, onTrial, onNotify }) {
-  const [showBuy, setShowBuy] = useState(false);
+// ── Plan buttons: trial + buy monthly/annual + transferencia ──────────────────
+const CBU_INFO = {
+  titular: "German Arturo Mercado",
+  cvu:     "0000003100067143702619",
+  alias:   "german.momentos",
+  cuit:    "20-38333928-7",
+};
 
-  const handleTrial = () => {
-    onTrial();
+function PlanButtons({ plan, onTrial, onNotify }) {
+  const [showBuy,      setShowBuy]      = useState(false);
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [copied,       setCopied]       = useState(false);
+
+  const handleTrial = () => { onTrial(); };
+
+  const copyAlias = () => {
+    navigator.clipboard.writeText(CBU_INFO.alias);
+    setCopied(true); setTimeout(() => setCopied(false), 2000);
+    // Registrar intento de pago por transferencia
+    try {
+      const transfers = JSON.parse(localStorage.getItem("gm_transfer_log") || "[]");
+      transfers.unshift({
+        id:        Date.now(),
+        userEmail: "Ver comprobante",
+        userName:  "Pendiente",
+        plan:      plan.name,
+        billing:   "mensual",
+        amount:    fmt(plan.priceMonthly),
+        amountNum: plan.priceMonthly,
+        date:      new Date().toLocaleString("es-AR"),
+        status:    "pending",
+      });
+      localStorage.setItem("gm_transfer_log", JSON.stringify(transfers.slice(0, 50)));
+    } catch {}
   };
 
   return (
@@ -507,26 +535,57 @@ function PlanButtons({ plan, onTrial, onNotify }) {
 
       {/* Comprar ahora toggle */}
       {!showBuy ? (
-        <button onClick={() => setShowBuy(true)} style={{ width:"100%", padding:"9px", borderRadius:"10px", background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.1)", color:"#64748b", cursor:"pointer", fontFamily:"inherit", fontSize:".78rem", touchAction:"manipulation" }}>
+        <button onClick={() => { setShowBuy(true); setShowTransfer(false); }} style={{ width:"100%", padding:"9px", borderRadius:"10px", background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.1)", color:"#64748b", cursor:"pointer", fontFamily:"inherit", fontSize:".78rem", touchAction:"manipulation" }}>
           Comprar ahora ↓
         </button>
       ) : (
         <div style={{ display:"flex", flexDirection:"column", gap:"6px", animation:"fadeIn .2s ease" }}>
           <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}`}</style>
+
+          {/* MP Mensual */}
           <a href={plan.mpLink} target="_blank" rel="noreferrer"
             onClick={() => onNotify(null, null, plan.name, "monthly")}
             style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", padding:"9px", borderRadius:"9px", background:"#009EE3", color:"#fff", textDecoration:"none", fontFamily:"inherit", fontSize:".78rem", fontWeight:"600", touchAction:"manipulation" }}>
             <MPLogo size={13}/> {fmt(plan.priceMonthly)}/mes
           </a>
+
+          {/* MP Anual */}
           <a href={MP_LINKS[plan.id + "_anual"] || plan.mpLink} target="_blank" rel="noreferrer"
             onClick={() => onNotify(null, null, plan.name, "annual")}
             style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", padding:"9px", borderRadius:"9px", background:"rgba(0,158,227,.15)", border:"1px solid rgba(0,158,227,.4)", color:"#38bdf8", textDecoration:"none", fontFamily:"inherit", fontSize:".78rem", fontWeight:"600", touchAction:"manipulation" }}>
             <MPLogo size={13}/> {fmt(plan.priceAnnual)}/año · −15%
           </a>
+
+          {/* Transferencia bancaria */}
+          {!showTransfer ? (
+            <button onClick={() => setShowTransfer(true)} style={{ width:"100%", padding:"8px", borderRadius:"9px", background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.1)", color:"#64748b", cursor:"pointer", fontFamily:"inherit", fontSize:".74rem", touchAction:"manipulation" }}>
+              🏦 Pagar por transferencia
+            </button>
+          ) : (
+            <div style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.1)", borderRadius:"9px", padding:"10px 12px" }}>
+              <div style={{ color:"#94a3b8", fontSize:".7rem", fontWeight:"600", marginBottom:"8px" }}>🏦 Datos para transferencia</div>
+              <div style={{ display:"flex", flexDirection:"column", gap:"4px", fontSize:".72rem", color:"#64748b" }}>
+                <div><span style={{ color:"#475569" }}>Titular:</span> {CBU_INFO.titular}</div>
+                <div><span style={{ color:"#475569" }}>CVU:</span> {CBU_INFO.cvu}</div>
+                <div style={{ display:"flex", alignItems:"center", gap:"6px" }}>
+                  <span style={{ color:"#475569" }}>Alias:</span>
+                  <strong style={{ color:"#e2e8f0" }}>{CBU_INFO.alias}</strong>
+                  <button onClick={copyAlias} style={{ background: copied?"rgba(52,211,153,.15)":"rgba(255,255,255,.08)", border:`1px solid ${copied?"rgba(52,211,153,.3)":"rgba(255,255,255,.12)"}`, color: copied?"#34d399":"#64748b", borderRadius:"5px", padding:"2px 7px", cursor:"pointer", fontSize:".65rem", fontFamily:"inherit" }}>
+                    {copied ? "✓" : "Copiar"}
+                  </button>
+                </div>
+              </div>
+              <div style={{ marginTop:"8px", background:"rgba(99,102,241,.1)", border:"1px solid rgba(99,102,241,.2)", borderRadius:"7px", padding:"7px 10px", color:"#a5b4fc", fontSize:".7rem", lineHeight:"1.5" }}>
+                Una vez transferido enviá el comprobante a <strong>{SUPPORT_EMAIL}</strong> y activamos tu plan en menos de 24hs.
+              </div>
+              <button onClick={() => setShowTransfer(false)} style={{ background:"none", border:"none", color:"#334155", cursor:"pointer", fontSize:".66rem", fontFamily:"inherit", marginTop:"5px" }}>✕ Cerrar</button>
+            </div>
+          )}
+
           <div style={{ textAlign:"center", color:"#1e293b", fontSize:".6rem", lineHeight:"1.4" }}>
             Pagá → ingresá con Google → enviá comprobante a {SUPPORT_EMAIL}
           </div>
-          <button onClick={() => setShowBuy(false)} style={{ background:"none", border:"none", color:"#334155", cursor:"pointer", fontSize:".68rem", fontFamily:"inherit" }}>
+          <button onClick={() => { setShowBuy(false); setShowTransfer(false); }} style={{ background:"none", border:"none", color:"#334155", cursor:"pointer", fontSize:".68rem", fontFamily:"inherit" }}>
             ✕ Cerrar
           </button>
         </div>
