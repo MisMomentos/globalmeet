@@ -22,10 +22,14 @@ const PRECIOS = {
   auricular:  { mensual: 59900, anual: 575040  },
 };
 const MP_LINKS = {
-  basic:      "https://mpago.la/BASIC_LINK",
-  pro:        "https://mpago.la/PRO_LINK",
-  enterprise: "https://mpago.la/ENTERPRISE_LINK",
-  auricular:  "https://mpago.la/AURICULAR_LINK",
+  basic:      "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=e25b015b9acd46dcb6c854fa1f1a46a1",
+  basic_anual:"https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=369e7469cf614247a9cbd78f1ed3b058",
+  pro:        "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=932081a5419147dd9156f4a3643dd009",
+  pro_anual:  "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=6ba29d8d35164081a50fb177c97f905d",
+  enterprise: "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=9e7c1e84468948538acbb0d82f6eb21f",
+  enterprise_anual: "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=793d70bb1195417690f7a4d41a90ed6e",
+  auricular:  "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=5cce77854cc14561b066f49b0540de58",
+  auricular_anual: "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=6d9f565d1902439bb320ad8470121d34",
 };
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -514,7 +518,7 @@ function PlanButtons({ plan, onTrial, onNotify }) {
             style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", padding:"9px", borderRadius:"9px", background:"#009EE3", color:"#fff", textDecoration:"none", fontFamily:"inherit", fontSize:".78rem", fontWeight:"600", touchAction:"manipulation" }}>
             <MPLogo size={13}/> {fmt(plan.priceMonthly)}/mes
           </a>
-          <a href={plan.mpLink + "?billing=annual"} target="_blank" rel="noreferrer"
+          <a href={MP_LINKS[plan.id + "_anual"] || plan.mpLink} target="_blank" rel="noreferrer"
             onClick={() => onNotify(null, null, plan.name, "annual")}
             style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", padding:"9px", borderRadius:"9px", background:"rgba(0,158,227,.15)", border:"1px solid rgba(0,158,227,.4)", color:"#38bdf8", textDecoration:"none", fontFamily:"inherit", fontSize:".78rem", fontWeight:"600", touchAction:"manipulation" }}>
             <MPLogo size={13}/> {fmt(plan.priceAnnual)}/año · −15%
