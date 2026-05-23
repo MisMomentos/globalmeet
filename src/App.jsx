@@ -822,7 +822,7 @@ function LoginScreen({ onLogin }) {
     setErr("");
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.href },
+      options: { redirectTo: "https://globalmeet-six.vercel.app" },
     });
     if (error) { setErr("Error al conectar con Google."); setLoading(false); }
   };
