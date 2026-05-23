@@ -11,10 +11,11 @@ const PRECIOS = {
   basic:      { mensual: 14900, anual: 143040  },
   pro:        { mensual: 24900, anual: 239040  },
   enterprise: { mensual: 44900, anual: 431040  },
+  auricular:  { mensual: 59900, anual: 575040  },
 };
 // ═══════════════════════════════════════════════════════════════════════════
 
-// ── Leer log de intentos de pago (guardado por la app) ────────────────────────
+// ── Leer log de intentos de pago ─────────────────────────────────────────────
 function usePaymentLog() {
   const [log, setLog] = useState([]);
   useEffect(() => {
@@ -25,6 +26,32 @@ function usePaymentLog() {
   }, []);
   const clear = () => { localStorage.removeItem("gm_payment_log"); setLog([]); };
   return { log, clear };
+}
+
+// ── Leer transferencias pendientes ───────────────────────────────────────────
+function useTransferLog() {
+  const [transfers, setTransfers] = useState([]);
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("gm_transfer_log") || "[]");
+      setTransfers(stored);
+    } catch {}
+  }, []);
+  const confirm = (id) => {
+    setTransfers(prev => {
+      const updated = prev.map(t => t.id === id ? { ...t, status: "confirmed" } : t);
+      localStorage.setItem("gm_transfer_log", JSON.stringify(updated));
+      return updated;
+    });
+  };
+  const reject = (id) => {
+    setTransfers(prev => {
+      const updated = prev.map(t => t.id === id ? { ...t, status: "rejected" } : t);
+      localStorage.setItem("gm_transfer_log", JSON.stringify(updated));
+      return updated;
+    });
+  };
+  return { transfers, confirm, reject };
 }
 
 // ── Responsive hook ───────────────────────────────────────────────────────────
@@ -577,6 +604,191 @@ function PaymentLogView() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// TRANSFERS VIEW
+// ══════════════════════════════════════════════════════════════════════════════
+function TransfersView() {
+  const { transfers, confirm, reject } = useTransferLog();
+  const [toast, setToast] = useState(null);
+  const showToast = (msg, type="success") => { setToast({msg,type}); setTimeout(()=>setToast(null),3000); };
+
+  const pending   = transfers.filter(t => t.status === "pending");
+  const confirmed = transfers.filter(t => t.status === "confirmed");
+  const rejected  = transfers.filter(t => t.status === "rejected");
+
+  return (
+    <div>
+      {toast && <Toast msg={toast.msg} type={toast.type}/>}
+      <h2 style={{ color:"#f1f5f9", fontSize:"1rem", fontWeight:"600", margin:"0 0 16px" }}>🏦 Transferencias</h2>
+
+      {/* Alerta pendientes */}
+      {pending.length > 0 && (
+        <div style={{ background:"rgba(217,119,6,.1)", border:"1px solid rgba(217,119,6,.3)", borderRadius:"10px", padding:"12px 16px", marginBottom:"16px" }}>
+          <div style={{ color:"#fbbf24", fontWeight:"600", fontSize:".85rem", marginBottom:"8px" }}>
+            ⚠️ {pending.length} transferencia{pending.length>1?"s":""} pendiente{pending.length>1?"s":""} de verificar
+          </div>
+          <div style={{ color:"#92400e", fontSize:".76rem" }}>
+            Verificá en tu cuenta bancaria o MP que el monto coincida antes de confirmar.
+          </div>
+        </div>
+      )}
+
+      {/* Pendientes */}
+      {pending.length > 0 && (
+        <div style={{ marginBottom:"20px" }}>
+          <div style={{ color:"#fbbf24", fontSize:".68rem", letterSpacing:".1em", marginBottom:"8px" }}>PENDIENTES DE VERIFICAR</div>
+          {pending.map(t => (
+            <div key={t.id} style={{ background:"rgba(217,119,6,.08)", border:"1px solid rgba(217,119,6,.3)", borderRadius:"11px", padding:"12px 14px", marginBottom:"7px" }}>
+              <div style={{ display:"flex", gap:"7px", flexWrap:"wrap", alignItems:"center", marginBottom:"4px" }}>
+                <span style={{ color:"#f1f5f9", fontWeight:"600", fontSize:".86rem" }}>{t.userName || "Usuario"}</span>
+                <span style={{ background:"rgba(217,119,6,.2)", color:"#fbbf24", borderRadius:"20px", padding:"1px 8px", fontSize:".62rem", fontWeight:"600" }}>TRANSFERENCIA</span>
+                <span style={{ background:"rgba(255,255,255,.05)", color:"#64748b", borderRadius:"20px", padding:"1px 8px", fontSize:".62rem" }}>{t.plan}</span>
+              </div>
+              <div style={{ color:"#475569", fontSize:".72rem" }}>{t.userEmail} · {t.date}</div>
+              <div style={{ color:"#fbbf24", fontWeight:"700", fontSize:".9rem", margin:"4px 0 8px" }}>{t.amount}</div>
+              <div style={{ display:"flex", gap:"7px" }}>
+                <button onClick={()=>{ confirm(t.id); showToast("Transferencia confirmada — activá el plan del usuario"); }} style={{ ...btnG, padding:"6px 13px", fontSize:".76rem" }}>✅ Confirmar</button>
+                <button onClick={()=>{ reject(t.id); showToast("Transferencia rechazada","warn"); }} style={{ ...btnR, padding:"6px 13px", fontSize:".76rem" }}>✕ Rechazar</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Confirmadas */}
+      {confirmed.length > 0 && (
+        <div style={{ marginBottom:"16px" }}>
+          <div style={{ color:"#64748b", fontSize:".68rem", letterSpacing:".1em", marginBottom:"8px" }}>CONFIRMADAS ({confirmed.length})</div>
+          {confirmed.map(t => (
+            <div key={t.id} style={{ background:"rgba(255,255,255,.02)", border:"1px solid rgba(255,255,255,.06)", borderRadius:"9px", padding:"10px 13px", marginBottom:"5px", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"8px" }}>
+              <div>
+                <div style={{ color:"#cbd5e1", fontSize:".83rem" }}>{t.userName} · {t.plan}</div>
+                <div style={{ color:"#334155", fontSize:".7rem" }}>{t.userEmail} · {t.date}</div>
+              </div>
+              <div style={{ color:"#4ade80", fontWeight:"700" }}>{t.amount}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {transfers.length === 0 && (
+        <div style={{ textAlign:"center", color:"#334155", padding:"40px 0" }}>
+          <div style={{ fontSize:"2rem", marginBottom:"10px" }}>🏦</div>
+          <p style={{ fontSize:".85rem" }}>No hay transferencias registradas todavía.</p>
+          <p style={{ fontSize:".76rem", color:"#1e293b" }}>Cuando un cliente elija pagar por transferencia aparecerá acá.</p>
+        </div>
+      )}
+
+      <div style={{ background:"rgba(99,102,241,.08)", border:"1px solid rgba(99,102,241,.2)", borderRadius:"10px", padding:"12px 14px", marginTop:"16px" }}>
+        <div style={{ color:"#818cf8", fontWeight:"600", fontSize:".8rem", marginBottom:"4px" }}>💡 Flujo de transferencias</div>
+        <div style={{ color:"#475569", fontSize:".74rem", lineHeight:"1.6" }}>
+          1. Cliente elige "Pagar por transferencia" → ve tu CVU/alias<br/>
+          2. Transfiere y envía comprobante a {SUPPORT_EMAIL}<br/>
+          3. Vos verificás en tu cuenta → confirmás acá<br/>
+          4. Activás el plan del usuario en la sección Usuarios
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// COST CENTER VIEW
+// ══════════════════════════════════════════════════════════════════════════════
+function CostCenterView({ payments, users }) {
+  const { transfers } = useTransferLog();
+  const { log: payLog } = usePaymentLog();
+
+  const fmt = n => new Intl.NumberFormat("es-AR", { style:"currency", currency:"ARS", maximumFractionDigits:0 }).format(n);
+
+  // Calcular ingresos por método de pago
+  const mpRevenue       = payments.filter(p=>p.status==="confirmed").reduce((s,p)=>s+p.amount,0);
+  const transferRevenue = transfers.filter(t=>t.status==="confirmed").reduce((s,t)=>s+(t.amountNum||0),0);
+  const totalRevenue    = mpRevenue + transferRevenue;
+
+  // Ingresos por plan
+  const byPlan = {};
+  payments.filter(p=>p.status==="confirmed").forEach(p => {
+    if (!byPlan[p.plan]) byPlan[p.plan]={ count:0, total:0 };
+    byPlan[p.plan].count++;
+    byPlan[p.plan].total+=p.amount;
+  });
+
+  // Ingresos por mes (últimos 3 meses)
+  const now = new Date();
+  const months = [0,1,2].map(i => {
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    return {
+      label: d.toLocaleDateString("es-AR", { month:"long", year:"numeric" }),
+      total: payments.filter(p => {
+        const pd = new Date(p.date);
+        return p.status==="confirmed" && pd.getMonth()===d.getMonth() && pd.getFullYear()===d.getFullYear();
+      }).reduce((s,p)=>s+p.amount,0)
+    };
+  }).reverse();
+
+  const PLAN_LABELS = { trial:"Prueba", basic:"Básico", pro:"Pro", enterprise:"Enterprise", auricular:"Auricular" };
+
+  return (
+    <div>
+      <h2 style={{ color:"#f1f5f9", fontSize:"1rem", fontWeight:"600", margin:"0 0 16px" }}>📊 Centro de costos</h2>
+
+      {/* Totales */}
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))", gap:"10px", marginBottom:"20px" }}>
+        <div style={{ background:"linear-gradient(135deg,rgba(79,70,229,.2),rgba(124,58,237,.1))", border:"1px solid rgba(99,102,241,.3)", borderRadius:"12px", padding:"16px" }}>
+          <div style={{ color:"#a5b4fc", fontSize:".68rem", letterSpacing:".1em", marginBottom:"5px" }}>TOTAL INGRESOS</div>
+          <div style={{ fontSize:"1.6rem", fontWeight:"700", color:"#f1f5f9" }}>{fmt(totalRevenue)}</div>
+          <div style={{ color:"#475569", fontSize:".7rem" }}>acumulado</div>
+        </div>
+        <div style={{ background:"rgba(0,158,227,.1)", border:"1px solid rgba(0,158,227,.3)", borderRadius:"12px", padding:"16px" }}>
+          <div style={{ color:"#38bdf8", fontSize:".68rem", letterSpacing:".1em", marginBottom:"5px" }}>MERCADO PAGO</div>
+          <div style={{ fontSize:"1.6rem", fontWeight:"700", color:"#f1f5f9" }}>{fmt(mpRevenue)}</div>
+          <div style={{ color:"#475569", fontSize:".7rem" }}>{payments.filter(p=>p.status==="confirmed").length} pagos</div>
+        </div>
+        <div style={{ background:"rgba(22,163,74,.1)", border:"1px solid rgba(22,163,74,.3)", borderRadius:"12px", padding:"16px" }}>
+          <div style={{ color:"#4ade80", fontSize:".68rem", letterSpacing:".1em", marginBottom:"5px" }}>TRANSFERENCIAS</div>
+          <div style={{ fontSize:"1.6rem", fontWeight:"700", color:"#f1f5f9" }}>{fmt(transferRevenue)}</div>
+          <div style={{ color:"#475569", fontSize:".7rem" }}>{transfers.filter(t=>t.status==="confirmed").length} confirmadas</div>
+        </div>
+        <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.08)", borderRadius:"12px", padding:"16px" }}>
+          <div style={{ color:"#94a3b8", fontSize:".68rem", letterSpacing:".1em", marginBottom:"5px" }}>CLIENTES ACTIVOS</div>
+          <div style={{ fontSize:"1.6rem", fontWeight:"700", color:"#f1f5f9" }}>{users.filter(u=>u.active&&u.plan!=="trial").length}</div>
+          <div style={{ color:"#475569", fontSize:".7rem" }}>pagos activos</div>
+        </div>
+      </div>
+
+      {/* Por plan */}
+      <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:"12px", padding:"16px", marginBottom:"16px" }}>
+        <div style={{ color:"#94a3b8", fontSize:".68rem", letterSpacing:".1em", marginBottom:"12px" }}>INGRESOS POR PLAN</div>
+        {Object.keys(byPlan).length === 0 ? (
+          <div style={{ color:"#334155", fontSize:".8rem" }}>Sin datos todavía</div>
+        ) : (
+          Object.entries(byPlan).map(([plan, data]) => (
+            <div key={plan} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 0", borderBottom:"1px solid rgba(255,255,255,.04)" }}>
+              <div>
+                <span style={{ color:"#cbd5e1", fontSize:".83rem" }}>{PLAN_LABELS[plan]||plan}</span>
+                <span style={{ color:"#475569", fontSize:".72rem", marginLeft:"8px" }}>{data.count} cliente{data.count!==1?"s":""}</span>
+              </div>
+              <span style={{ color:"#4ade80", fontWeight:"700", fontSize:".88rem" }}>{fmt(data.total)}</span>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Por mes */}
+      <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:"12px", padding:"16px" }}>
+        <div style={{ color:"#94a3b8", fontSize:".68rem", letterSpacing:".1em", marginBottom:"12px" }}>INGRESOS POR MES</div>
+        {months.map((m,i) => (
+          <div key={i} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 0", borderBottom:"1px solid rgba(255,255,255,.04)" }}>
+            <span style={{ color:"#94a3b8", fontSize:".82rem", textTransform:"capitalize" }}>{m.label}</span>
+            <span style={{ color: m.total>0?"#4ade80":"#334155", fontWeight:"700", fontSize:".88rem" }}>{fmt(m.total)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // MAIN ADMIN PANEL
 // ══════════════════════════════════════════════════════════════════════════════
 export default function AdminPanel() {
@@ -590,15 +802,19 @@ export default function AdminPanel() {
 
   if (!logged) return <AdminLogin onLogin={()=>setLogged(true)}/>;
 
-  const pendingCount  = payments.filter(p=>p.status==="pending").length;
-  const expiringCount = users.filter(u=>{ const d=daysDiff(new Date(),u.planEnd); return d>=0&&d<=7&&u.plan!=="trial"; }).length;
-  const payLogCount   = log.length;
+  const pendingCount    = payments.filter(p=>p.status==="pending").length;
+  const expiringCount   = users.filter(u=>{ const d=daysDiff(new Date(),u.planEnd); return d>=0&&d<=7&&u.plan!=="trial"; }).length;
+  const payLogCount     = log.length;
+  const { transfers }   = useTransferLog();
+  const transferPending = transfers.filter(t=>t.status==="pending").length;
 
   const tabs=[
     { id:"dashboard",     icon:"📊", label:"Resumen"        },
     { id:"users",         icon:"👥", label:"Usuarios"        },
     { id:"payments",      icon:"💳", label:"Pagos",    badge:pendingCount   },
+    { id:"transfers",     icon:"🏦", label:"Transf.",  badge:transferPending },
     { id:"paylog",        icon:"🔔", label:"Intentos", badge:payLogCount > 0 ? payLogCount : 0 },
+    { id:"costcenter",    icon:"📈", label:"Costos"          },
     { id:"pricing",       icon:"💰", label:"Precios"         },
     { id:"notifications", icon:"📧", label:"Emails",   badge:expiringCount  },
   ];
@@ -658,7 +874,9 @@ export default function AdminPanel() {
           {tab==="dashboard"     && <DashboardView     users={users} payments={payments}/>}
           {tab==="users"         && <UsersView         users={users} setUsers={setUsers}/>}
           {tab==="payments"      && <PaymentsView      payments={payments} setPayments={setPayments} setUsers={setUsers}/>}
+          {tab==="transfers"     && <TransfersView/>}
           {tab==="paylog"        && <PaymentLogView/>}
+          {tab==="costcenter"    && <CostCenterView    payments={payments} users={users}/>}
           {tab==="pricing"       && <PricingView/>}
           {tab==="notifications" && <NotificationsView users={users}/>}
         </div>
