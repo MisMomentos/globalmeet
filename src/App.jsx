@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -7,6 +7,224 @@ import { createClient } from "@supabase/supabase-js";
 const APP_NAME      = "GlobalMeet";
 const APP_SLOGAN    = "Reuniones sin fronteras · Traducción simultánea";
 const SUPPORT_EMAIL = "germanmomentos@gmail.com";
+
+// ── Sistema de traducciones de la interfaz ────────────────────────────────────
+const UI_TRANSLATIONS = {
+  es: {
+    slogan:        "Reuniones sin fronteras · Traducción simultánea",
+    hello:         "¡Hola, Globalmeetero! 👋",
+    community:     "Somos una comunidad de profesionales que rompen barreras del idioma en sus negocios.",
+    community2:    "Desde Buenos Aires hasta Tokio — todos hablamos el mismo idioma: los negocios.",
+    loginBtn:      "Iniciar sesión con Google →",
+    freedays:      "14 días gratis · Sin tarjeta de crédito",
+    monthly:       "Mensual",
+    annual:        "Anual −15%",
+    trialBtn:      "Probar {n} días gratis",
+    buyNow:        "Comprar ahora ↓",
+    transfer:      "🏦 Pagar por transferencia",
+    plans:         "Planes",
+    hi:            "Hola",
+    yourPlan:      "Tu plan",
+    newConv:       "Nueva conversación",
+    change:        "Cambiar ↗",
+    logout:        "Salir",
+    joinRoom:      "📨 Te invitaron a una sala",
+    joinCode:      "Código:",
+    yourName:      "¿Cómo te llamás?",
+    yourLang:      "Tu idioma",
+    enterRoom:     "Entrar a la sala →",
+    backHome:      "← Volver al inicio",
+    startChat:     "💬 Iniciar chat →",
+    startVideo:    "🎥 Iniciar videollamada →",
+    startEarpiece: "🎧 Iniciar modo auricular →",
+    chatWelcome:   "Presioná el micrófono para comenzar",
+    waitingWake:   'Esperando "Hola GlobalMeet"...',
+    listening:     "Escuchando — hablá ahora",
+    translating:   "Traduciendo...",
+    speaking:      "Reproduciendo traducción",
+    restart:       "🔄 Reiniciar escucha",
+    assistantQ:    "¿Estás listo para pertenecer a nuestra comunidad Globalmeeteros? 🌍",
+    communityTag:  "Comunidad Globalmeeteros",
+  },
+  en: {
+    slogan:        "Meetings without borders · Simultaneous translation",
+    hello:         "Hello, Globalmeetero! 👋",
+    community:     "We are a community of professionals breaking language barriers in business.",
+    community2:    "From Buenos Aires to Tokyo — we all speak the same language: business.",
+    loginBtn:      "Sign in with Google →",
+    freedays:      "14 days free · No credit card",
+    monthly:       "Monthly",
+    annual:        "Annual −15%",
+    trialBtn:      "Try {n} days free",
+    buyNow:        "Buy now ↓",
+    transfer:      "🏦 Pay by bank transfer",
+    plans:         "Plans",
+    hi:            "Hello",
+    yourPlan:      "Your plan",
+    newConv:       "New conversation",
+    change:        "Change ↗",
+    logout:        "Sign out",
+    joinRoom:      "📨 You were invited to a room",
+    joinCode:      "Code:",
+    yourName:      "What's your name?",
+    yourLang:      "Your language",
+    enterRoom:     "Enter room →",
+    backHome:      "← Back to home",
+    startChat:     "💬 Start chat →",
+    startVideo:    "🎥 Start video call →",
+    startEarpiece: "🎧 Start earpiece mode →",
+    chatWelcome:   "Press the microphone to start",
+    waitingWake:   'Waiting for "Hello GlobalMeet"...',
+    listening:     "Listening — speak now",
+    translating:   "Translating...",
+    speaking:      "Playing translation",
+    restart:       "🔄 Restart listening",
+    assistantQ:    "Ready to join our Globalmeeteros community? 🌍",
+    communityTag:  "Globalmeeteros Community",
+  },
+  pt: {
+    slogan:        "Reuniões sem fronteiras · Tradução simultânea",
+    hello:         "Olá, Globalmeeteiro! 👋",
+    community:     "Somos uma comunidade de profissionais que quebram barreiras de idiomas nos negócios.",
+    community2:    "De Buenos Aires a Tóquio — todos falamos o mesmo idioma: negócios.",
+    loginBtn:      "Entrar com Google →",
+    freedays:      "14 dias grátis · Sem cartão",
+    monthly:       "Mensal",
+    annual:        "Anual −15%",
+    trialBtn:      "Testar {n} dias grátis",
+    buyNow:        "Comprar agora ↓",
+    transfer:      "🏦 Pagar por transferência",
+    plans:         "Planos",
+    hi:            "Olá",
+    yourPlan:      "Seu plano",
+    newConv:       "Nova conversa",
+    change:        "Mudar ↗",
+    logout:        "Sair",
+    joinRoom:      "📨 Você foi convidado para uma sala",
+    joinCode:      "Código:",
+    yourName:      "Qual é o seu nome?",
+    yourLang:      "Seu idioma",
+    enterRoom:     "Entrar na sala →",
+    backHome:      "← Voltar ao início",
+    startChat:     "💬 Iniciar chat →",
+    startVideo:    "🎥 Iniciar videochamada →",
+    startEarpiece: "🎧 Iniciar modo fone →",
+    chatWelcome:   "Pressione o microfone para começar",
+    waitingWake:   'Aguardando "Olá GlobalMeet"...',
+    listening:     "Ouvindo — fale agora",
+    translating:   "Traduzindo...",
+    speaking:      "Reproduzindo tradução",
+    restart:       "🔄 Reiniciar escuta",
+    assistantQ:    "Pronto para entrar na nossa comunidade Globalmeeteiros? 🌍",
+    communityTag:  "Comunidade Globalmeeteiros",
+  },
+  fr: {
+    slogan:        "Réunions sans frontières · Traduction simultanée",
+    hello:         "Bonjour, Globalmeeteur! 👋",
+    community:     "Nous sommes une communauté de professionnels qui brisent les barrières linguistiques.",
+    community2:    "De Buenos Aires à Tokyo — nous parlons tous le même langage : les affaires.",
+    loginBtn:      "Se connecter avec Google →",
+    freedays:      "14 jours gratuits · Sans carte",
+    monthly:       "Mensuel",
+    annual:        "Annuel −15%",
+    trialBtn:      "Essayer {n} jours gratuits",
+    buyNow:        "Acheter maintenant ↓",
+    transfer:      "🏦 Payer par virement",
+    plans:         "Forfaits",
+    hi:            "Bonjour",
+    yourPlan:      "Votre forfait",
+    newConv:       "Nouvelle conversation",
+    change:        "Changer ↗",
+    logout:        "Déconnexion",
+    joinRoom:      "📨 Vous avez été invité dans une salle",
+    joinCode:      "Code:",
+    yourName:      "Quel est votre nom?",
+    yourLang:      "Votre langue",
+    enterRoom:     "Entrer dans la salle →",
+    backHome:      "← Retour à l'accueil",
+    startChat:     "💬 Démarrer le chat →",
+    startVideo:    "🎥 Démarrer l'appel vidéo →",
+    startEarpiece: "🎧 Mode oreillette →",
+    chatWelcome:   "Appuyez sur le micro pour commencer",
+    waitingWake:   'En attente de "Bonjour GlobalMeet"...',
+    listening:     "À l'écoute — parlez maintenant",
+    translating:   "Traduction en cours...",
+    speaking:      "Lecture de la traduction",
+    restart:       "🔄 Redémarrer l'écoute",
+    assistantQ:    "Prêt à rejoindre notre communauté Globalmeeteurs? 🌍",
+    communityTag:  "Communauté Globalmeeteurs",
+  },
+  de: {
+    slogan:        "Meetings ohne Grenzen · Simultanübersetzung",
+    hello:         "Hallo, Globalmeeterer! 👋",
+    community:     "Wir sind eine Gemeinschaft von Fachleuten, die Sprachbarrieren im Geschäftsleben überwinden.",
+    community2:    "Von Buenos Aires bis Tokio — wir alle sprechen dieselbe Sprache: Geschäft.",
+    loginBtn:      "Mit Google anmelden →",
+    freedays:      "14 Tage kostenlos · Keine Karte",
+    monthly:       "Monatlich",
+    annual:        "Jährlich −15%",
+    trialBtn:      "{n} Tage kostenlos testen",
+    buyNow:        "Jetzt kaufen ↓",
+    transfer:      "🏦 Per Überweisung zahlen",
+    plans:         "Pläne",
+    hi:            "Hallo",
+    yourPlan:      "Ihr Plan",
+    newConv:       "Neues Gespräch",
+    change:        "Ändern ↗",
+    logout:        "Abmelden",
+    joinRoom:      "📨 Sie wurden in einen Raum eingeladen",
+    joinCode:      "Code:",
+    yourName:      "Wie heißen Sie?",
+    yourLang:      "Ihre Sprache",
+    enterRoom:     "Raum betreten →",
+    backHome:      "← Zurück zur Startseite",
+    startChat:     "💬 Chat starten →",
+    startVideo:    "🎥 Videoanruf starten →",
+    startEarpiece: "🎧 Ohrhörer-Modus →",
+    chatWelcome:   "Drücken Sie das Mikrofon zum Starten",
+    waitingWake:   'Warte auf "Hallo GlobalMeet"...',
+    listening:     "Zuhören — sprechen Sie jetzt",
+    translating:   "Übersetzen...",
+    speaking:      "Übersetzung wird abgespielt",
+    restart:       "🔄 Zuhören neu starten",
+    assistantQ:    "Bereit, unserer Globalmeeterer-Community beizutreten? 🌍",
+    communityTag:  "Globalmeeterer-Gemeinschaft",
+  },
+  it: { slogan:"Riunioni senza confini · Traduzione simultanea", hello:"Ciao, Globalmeetero! 👋", community:"Siamo una comunità di professionisti che abbattono le barriere linguistiche.", community2:"Da Buenos Aires a Tokyo — parliamo tutti la stessa lingua: gli affari.", loginBtn:"Accedi con Google →", freedays:"14 giorni gratis · Senza carta", monthly:"Mensile", annual:"Annuale −15%", trialBtn:"Prova {n} giorni gratis", buyNow:"Acquista ora ↓", transfer:"🏦 Paga con bonifico", plans:"Piani", hi:"Ciao", yourPlan:"Il tuo piano", newConv:"Nuova conversazione", change:"Cambia ↗", logout:"Esci", joinRoom:"📨 Sei stato invitato in una stanza", joinCode:"Codice:", yourName:"Come ti chiami?", yourLang:"La tua lingua", enterRoom:"Entra nella stanza →", backHome:"← Torna all'inizio", startChat:"💬 Inizia chat →", startVideo:"🎥 Inizia videochiamata →", startEarpiece:"🎧 Modalità auricolare →", chatWelcome:"Premi il microfono per iniziare", waitingWake:'Aspettando "Ciao GlobalMeet"...', listening:"In ascolto — parla ora", translating:"Traduzione...", speaking:"Riproduzione traduzione", restart:"🔄 Riavvia ascolto", assistantQ:"Pronto a unirti alla nostra comunità Globalmeeteros? 🌍", communityTag:"Comunità Globalmeeteros" },
+  ja: { slogan:"国境のない会議・同時通訳", hello:"こんにちは、グローバルミーター！👋", community:"私たちはビジネスの言語障壁を打ち破るプロフェッショナルのコミュニティです。", community2:"ブエノスアイレスから東京まで — 私たちは同じ言語を話します：ビジネス。", loginBtn:"Googleでサインイン →", freedays:"14日間無料・カード不要", monthly:"月払い", annual:"年払い −15%", trialBtn:"{n}日間無料体験", buyNow:"今すぐ購入 ↓", transfer:"🏦 銀行振込で支払う", plans:"プラン", hi:"こんにちは", yourPlan:"あなたのプラン", newConv:"新しい会話", change:"変更 ↗", logout:"ログアウト", joinRoom:"📨 ルームに招待されました", joinCode:"コード:", yourName:"お名前は？", yourLang:"言語", enterRoom:"ルームに入る →", backHome:"← ホームに戻る", startChat:"💬 チャット開始 →", startVideo:"🎥 ビデオ通話開始 →", startEarpiece:"🎧 イヤホンモード →", chatWelcome:"マイクを押して開始", waitingWake:'"こんにちは GlobalMeet"を待っています...', listening:"聞いています — 話してください", translating:"翻訳中...", speaking:"翻訳を再生中", restart:"🔄 聞き取り再開", assistantQ:"グローバルミーターコミュニティに参加する準備はできていますか？🌍", communityTag:"グローバルミーターコミュニティ" },
+  zh: { slogan:"无国界会议·同声传译", hello:"你好，全球会议者！👋", community:"我们是一个打破商业语言障碍的专业人士社区。", community2:"从布宜诺斯艾利斯到东京——我们都说同一种语言：商业。", loginBtn:"使用Google登录 →", freedays:"14天免费·无需信用卡", monthly:"月付", annual:"年付 −15%", trialBtn:"免费试用{n}天", buyNow:"立即购买 ↓", transfer:"🏦 银行转账付款", plans:"方案", hi:"你好", yourPlan:"您的方案", newConv:"新对话", change:"更改 ↗", logout:"退出", joinRoom:"📨 您被邀请加入房间", joinCode:"代码:", yourName:"您叫什么名字？", yourLang:"您的语言", enterRoom:"进入房间 →", backHome:"← 返回首页", startChat:"💬 开始聊天 →", startVideo:"🎥 开始视频通话 →", startEarpiece:"🎧 耳机模式 →", chatWelcome:"按麦克风开始", waitingWake:'"你好 GlobalMeet"等待中...', listening:"正在听——请说话", translating:"翻译中...", speaking:"播放翻译", restart:"🔄 重新开始监听", assistantQ:"准备好加入我们的全球会议者社区了吗？🌍", communityTag:"全球会议者社区" },
+  ar: { slogan:"اجتماعات بلا حدود · ترجمة فورية", hello:"مرحباً، عضو GlobalMeet! 👋", community:"نحن مجتمع من المحترفين الذين يكسرون حواجز اللغة في الأعمال.", community2:"من بوينس آيرس إلى طوكيو — نتحدث جميعاً نفس اللغة: الأعمال.", loginBtn:"تسجيل الدخول بـ Google ←", freedays:"14 يوماً مجاناً · بدون بطاقة", monthly:"شهري", annual:"سنوي −15%", trialBtn:"جرب {n} أيام مجاناً", buyNow:"اشترِ الآن ↓", transfer:"🏦 الدفع بالتحويل البنكي", plans:"الخطط", hi:"مرحباً", yourPlan:"خطتك", newConv:"محادثة جديدة", change:"تغيير ↗", logout:"خروج", joinRoom:"📨 تمت دعوتك إلى غرفة", joinCode:"الرمز:", yourName:"ما اسمك؟", yourLang:"لغتك", enterRoom:"دخول الغرفة ←", backHome:"← العودة للرئيسية", startChat:"💬 بدء المحادثة ←", startVideo:"🎥 بدء مكالمة الفيديو ←", startEarpiece:"🎧 وضع سماعة الأذن ←", chatWelcome:"اضغط على الميكروفون للبدء", waitingWake:'"مرحباً GlobalMeet" في انتظار...', listening:"أستمع — تحدث الآن", translating:"جاري الترجمة...", speaking:"تشغيل الترجمة", restart:"🔄 إعادة الاستماع", assistantQ:"هل أنت مستعد للانضمام إلى مجتمع GlobalMeet؟ 🌍", communityTag:"مجتمع GlobalMeet" },
+  ru: { slogan:"Встречи без границ · Синхронный перевод", hello:"Привет, Глобалмитер! 👋", community:"Мы сообщество профессионалов, устраняющих языковые барьеры в бизнесе.", community2:"От Буэнос-Айреса до Токио — мы все говорим на одном языке: бизнес.", loginBtn:"Войти через Google →", freedays:"14 дней бесплатно · Без карты", monthly:"Ежемесячно", annual:"Ежегодно −15%", trialBtn:"Попробовать {n} дней бесплатно", buyNow:"Купить сейчас ↓", transfer:"🏦 Оплата переводом", plans:"Планы", hi:"Привет", yourPlan:"Ваш план", newConv:"Новый разговор", change:"Изменить ↗", logout:"Выйти", joinRoom:"📨 Вас пригласили в комнату", joinCode:"Код:", yourName:"Как вас зовут?", yourLang:"Ваш язык", enterRoom:"Войти в комнату →", backHome:"← На главную", startChat:"💬 Начать чат →", startVideo:"🎥 Начать видеозвонок →", startEarpiece:"🎧 Режим наушников →", chatWelcome:"Нажмите микрофон для начала", waitingWake:'"Привет GlobalMeet" ожидание...', listening:"Слушаю — говорите сейчас", translating:"Перевод...", speaking:"Воспроизведение перевода", restart:"🔄 Перезапустить прослушивание", assistantQ:"Готовы присоединиться к сообществу Глобалмитеров? 🌍", communityTag:"Сообщество Глобалмитеров" },
+};
+
+// ── Hook de idioma global ─────────────────────────────────────────────────────
+function useAppLang() {
+  const detectLang = () => {
+    // 1. Preferencia guardada
+    try {
+      const saved = localStorage.getItem("gm_ui_lang");
+      if (saved && UI_TRANSLATIONS[saved]) return saved;
+    } catch {}
+    // 2. Idioma del navegador
+    const nav = (navigator.language || navigator.userLanguage || "es").slice(0,2).toLowerCase();
+    return UI_TRANSLATIONS[nav] ? nav : "es";
+  };
+  const [lang, setLangState] = useState(detectLang);
+  const setLang = (l) => {
+    setLangState(l);
+    try { localStorage.setItem("gm_ui_lang", l); } catch {}
+  };
+  const t = (key, vars = {}) => {
+    let str = UI_TRANSLATIONS[lang]?.[key] || UI_TRANSLATIONS.es[key] || key;
+    Object.entries(vars).forEach(([k,v]) => { str = str.replace(`{${k}}`, v); });
+    return str;
+  };
+  return { lang, setLang, t };
+}
+
+// Context para compartir el idioma en toda la app
+const LangContext = React.createContext({ lang:"es", setLang:()=>{}, t:(k)=>k });
+function useLang() { return React.useContext(LangContext); }
 const MAX_FILE_MB   = 48;
 
 // ✏️  SUPABASE — credenciales del proyecto
@@ -701,16 +919,16 @@ function LandingChatBot() {
   const bottomRef = useRef(null);
 
   const WELCOMES = {
-    es: "👋 ¡Hola! ¿En qué te puedo ayudar?",
-    en: "👋 Hi! How can I help you?",
-    pt: "👋 Olá! Como posso ajudar?",
-    fr: "👋 Bonjour! Comment puis-je vous aider?",
-    de: "👋 Hallo! Wie kann ich helfen?",
-    it: "👋 Ciao! Come posso aiutarti?",
-    ja: "👋 こんにちは！どのようにお手伝いできますか？",
-    zh: "👋 您好！有什么可以帮助您的？",
-    ar: "👋 مرحباً! كيف يمكنني مساعدتك؟",
-    ru: "👋 Привет! Чем могу помочь?",
+    es: "👋 ¡Hola, Globalmeetero! ¿Estás listo para pertenecer a nuestra comunidad? Puedo contarte sobre los planes, cómo funciona la traducción, o hacer una demo. 🌍",
+    en: "👋 Hello, Globalmeetero! Ready to join our community? I can tell you about plans, how translation works, or run a demo. 🌍",
+    pt: "👋 Olá, Globalmeeteiro! Pronto para fazer parte da nossa comunidade? Posso ajudá-lo com planos, como funciona a tradução, ou uma demo. 🌍",
+    fr: "👋 Bonjour, Globalmeeteur! Prêt à rejoindre notre communauté? Je peux vous parler des forfaits, du fonctionnement ou faire une démo. 🌍",
+    de: "👋 Hallo, Globalmeeterer! Bereit, unserer Community beizutreten? Ich kann Ihnen über Pläne, Funktionsweise oder eine Demo berichten. 🌍",
+    it: "👋 Ciao, Globalmeetero! Pronto a far parte della nostra comunità? Posso spiegarti i piani, come funziona la traduzione, o fare una demo. 🌍",
+    ja: "👋 こんにちは、グローバルミーター！コミュニティに参加する準備はできていますか？プラン、翻訳の仕組み、デモについてお話しできます。🌍",
+    zh: "👋 你好，全球会议者！准备好加入我们的社区了吗？我可以为您介绍套餐、翻译功能或演示。🌍",
+    ar: "👋 مرحباً، عضو GlobalMeet! هل أنت مستعد للانضمام إلى مجتمعنا؟ يمكنني إخبارك عن الخطط أو كيفية عمل الترجمة. 🌍",
+    ru: "👋 Привет, Глобалмитер! Готовы присоединиться к нашему сообществу? Могу рассказать о планах, как работает перевод, или провести демонстрацию. 🌍",
   };
 
   const SYSTEM_PROMPT = `Sos el asistente virtual de GlobalMeet, plataforma SaaS de chat empresarial con traducción simultánea diseñada por Momentos (Argentina).
@@ -792,9 +1010,9 @@ Sé amigable y conciso. Máximo 2-3 párrafos.`;
     <>
       {/* Globo de bienvenida */}
       {bubble && !open && (
-        <div style={{ position:"fixed", bottom:"88px", right:"24px", background:"linear-gradient(135deg,#4f46e5,#7c3aed)", borderRadius:"12px 12px 4px 12px", padding:"10px 14px", color:"#fff", fontSize:".8rem", fontWeight:"500", zIndex:499, maxWidth:"200px", boxShadow:"0 4px 20px rgba(99,102,241,.4)", cursor:"pointer", animation:"popIn .4s ease" }} onClick={()=>{ setOpen(true); setBubble(false); }}>
+        <div style={{ position:"fixed", bottom:"88px", right:"24px", background:"linear-gradient(135deg,#4f46e5,#7c3aed)", borderRadius:"12px 12px 4px 12px", padding:"10px 14px", color:"#fff", fontSize:".8rem", fontWeight:"500", zIndex:499, maxWidth:"220px", boxShadow:"0 4px 20px rgba(99,102,241,.4)", cursor:"pointer", animation:"popIn .4s ease" }} onClick={()=>{ setOpen(true); setBubble(false); }}>
           <style>{`@keyframes popIn{from{opacity:0;transform:scale(.8) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}`}</style>
-          👋 ¡Hola! ¿En qué te puedo ayudar?
+          👋 ¡Hola, Globalmeetero! ¿En qué te puedo ayudar?
           <button onClick={e=>{e.stopPropagation();setBubble(false);}} style={{ position:"absolute", top:"-6px", right:"-6px", background:"#475569", border:"none", color:"#fff", borderRadius:"50%", width:"16px", height:"16px", fontSize:".55rem", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
         </div>
       )}
@@ -947,46 +1165,104 @@ function SecuritySection() {
 // ══════════════════════════════════════════════════════════════════════════════
 function LandingScreen({ onLogin, onTrial, onChangePlan, isLoggedIn }) {
   const [billing, setBilling] = useState("monthly");
+  const { isMobile } = useBreakpoint();
+  const { lang, setLang, t } = useLang();
 
   const handleTrial = (planId) => {
-    if (isLoggedIn && onChangePlan) {
-      // Usuario ya logueado — cambiar plan directo
-      onChangePlan(planId);
-    } else {
-      onTrial(planId);
-    }
+    if (isLoggedIn && onChangePlan) onChangePlan(planId);
+    else onTrial(planId);
   };
-  const { isMobile } = useBreakpoint();
 
   return (
-    <div style={{ minHeight: "100vh", background: "#080c14", fontFamily: "'Georgia','Times New Roman',serif", color: "#e2e8f0", overflowX: "hidden" }}>
+    <div style={{ minHeight:"100vh", background:"#080c14", fontFamily:"'Georgia','Times New Roman',serif", color:"#e2e8f0", overflowX:"hidden" }}>
       <style>{`
         @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
         @keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+        @keyframes orbit{from{transform:rotate(0deg) translateX(70px) rotate(0deg)}to{transform:rotate(360deg) translateX(70px) rotate(-360deg)}}
         .pcard{transition:transform .25s,box-shadow .25s;} @media(hover:hover){.pcard:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.5);}}
         .mpbtn{transition:opacity .2s;} @media(hover:hover){.mpbtn:hover{opacity:.82;}}
       `}</style>
       <BrowserBanner />
 
-      {/* Hero */}
-      <div style={{ textAlign: "center", padding: isMobile ? "48px 20px 32px" : "64px 24px 44px", background: "radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,102,241,.15) 0%,transparent 70%)", animation: "fadeIn .8s ease" }}>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "18px", animation: "floatY 4s ease-in-out infinite" }}>
-          <AppLogo size={isMobile ? 56 : 72} />
-        </div>
-        <h1 style={{ fontSize: isMobile ? "2.2rem" : "clamp(2.2rem,5vw,3.4rem)", fontWeight: "400", fontStyle: "italic", letterSpacing: ".06em", margin: "0 0 6px", color: "#f1f5f9", textShadow: "0 0 60px rgba(99,102,241,.4)" }}>
-          {APP_NAME}
-        </h1>
-        <p style={{ color: "#64748b", fontSize: isMobile ? ".82rem" : ".9rem", margin: "0 0 4px", lineHeight: 1.5 }}>{APP_SLOGAN}</p>
-        <p style={{ color: "#1e293b", fontSize: ".65rem", margin: "0 0 20px", letterSpacing: ".1em" }}>DISEÑADO POR MOMENTOS</p>
-        {BROWSER.micWarning && <p style={{ color: "#d97706", fontSize: ".73rem", margin: "0 0 14px" }}>⚠️ {BROWSER.micWarning}</p>}
-        <button onClick={onLogin} style={{ background: "linear-gradient(135deg,#4f46e5,#7c3aed)", border: "none", color: "#fff", borderRadius: "12px", padding: isMobile ? "13px 24px" : "13px 30px", fontSize: ".92rem", fontWeight: "600", cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 28px rgba(99,102,241,.45)", touchAction: "manipulation" }}>
-          Iniciar sesión con Google →
-        </button>
-        <p style={{ marginTop: "10px", color: "#334155", fontSize: ".72rem" }}>14 días gratis · Sin tarjeta de crédito</p>
+      {/* ── Language selector en header ── */}
+      <div style={{ display:"flex", justifyContent:"flex-end", padding:"10px 20px 0", gap:"8px", alignItems:"center" }}>
+        <span style={{ color:"#334155", fontSize:".7rem" }}>🌐</span>
+        <select value={lang} onChange={e=>setLang(e.target.value)} style={{ background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.1)", color:"#94a3b8", borderRadius:"8px", padding:"5px 10px", fontSize:".75rem", cursor:"pointer", outline:"none", fontFamily:"inherit" }}>
+          {LANDING_LANGS.map(l=>(
+            <option key={l.code} value={l.code} style={{ background:"#1e293b", color:"#fff" }}>{l.flag} {l.label}</option>
+          ))}
+        </select>
       </div>
 
-      {/* Plans — horizontal scroll */}
-      <div style={{ padding: "0 16px 52px" }}>
+      {/* ── PRIMERO: Comunidad Globalmeeteros ── */}
+      <div style={{ textAlign:"center", padding: isMobile?"40px 20px 20px":"56px 24px 24px", background:"radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,102,241,.15) 0%,transparent 70%)", animation:"fadeIn .8s ease" }}>
+        {/* Logo con banderas orbitando — funciona en desktop y mobile */}
+        <div style={{ position:"relative", width:"160px", height:"160px", margin:"0 auto 20px" }}>
+          <div style={{ width:"120px", height:"120px", borderRadius:"50%", background:"radial-gradient(circle, rgba(99,102,241,.2), rgba(45,212,191,.1))", border:"2px solid rgba(99,102,241,.3)", display:"flex", alignItems:"center", justifyContent:"center", position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", animation:"floatY 4s ease-in-out infinite" }}>
+            <AppLogo size={60} />
+          </div>
+          {/* Banderas orbitando con CSS animation — funciona en desktop */}
+          {["🇦🇷","🇺🇸","🇧🇷","🇫🇷","🇩🇪","🇯🇵","🇨🇳","🇮🇹"].map((flag,i) => (
+            <div key={i} style={{ position:"absolute", top:"50%", left:"50%", width:"24px", height:"24px", marginTop:"-12px", marginLeft:"-12px", fontSize:"1.1rem", animation:`orbit ${8+i*0.5}s linear ${i*-1}s infinite`, transformOrigin:"0 0", display:"flex", alignItems:"center", justifyContent:"center", filter:"drop-shadow(0 2px 4px rgba(0,0,0,.4))" }}>
+              {flag}
+            </div>
+          ))}
+        </div>
+
+        <h1 style={{ fontSize: isMobile?"2rem":"clamp(2rem,4vw,3rem)", fontWeight:"700", margin:"0 0 6px", color:"#f1f5f9", fontFamily:"'Segoe UI',system-ui,sans-serif" }}>
+          {t("hello")}
+        </h1>
+        <p style={{ color:"#64748b", fontSize: isMobile?".82rem":".92rem", margin:"0 0 4px", lineHeight:1.6, maxWidth:"540px", marginLeft:"auto", marginRight:"auto" }}>
+          {t("community")}
+        </p>
+        <p style={{ color:"#475569", fontSize:".8rem", margin:"0 0 24px" }}>
+          {t("community2")}
+        </p>
+
+        {/* Stats */}
+        <div style={{ display:"flex", gap:"12px", justifyContent:"center", flexWrap:"wrap", marginBottom:"24px" }}>
+          {[{n:"10",label:"Idiomas",icon:"🌐"},{n:"30",label:"Max/sala",icon:"👥"},{n:"24/7",label:"Disponible",icon:"⏰"},{n:"0",label:"Barreras",icon:"🚫"}].map((s,i)=>(
+            <div key={i} style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.08)", borderRadius:"12px", padding:"10px 16px", minWidth:"80px" }}>
+              <div style={{ fontSize:"1rem" }}>{s.icon}</div>
+              <div style={{ color:"#a5b4fc", fontWeight:"700", fontSize:"1.1rem" }}>{s.n}</div>
+              <div style={{ color:"#475569", fontSize:".65rem" }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Nombre y slogan */}
+        <h2 style={{ fontSize: isMobile?"1.8rem":"2.4rem", fontWeight:"400", fontStyle:"italic", letterSpacing:".06em", margin:"0 0 4px", color:"#f1f5f9", textShadow:"0 0 60px rgba(99,102,241,.4)", fontFamily:"'Georgia',serif" }}>
+          {APP_NAME}
+        </h2>
+        <p style={{ color:"#64748b", fontSize: isMobile?".8rem":".88rem", margin:"0 0 4px" }}>{t("slogan")}</p>
+        <p style={{ color:"#1e293b", fontSize:".62rem", margin:"0 0 20px", letterSpacing:".1em" }}>DISEÑADO POR MOMENTOS</p>
+
+        {BROWSER.micWarning && <p style={{ color:"#d97706", fontSize:".73rem", margin:"0 0 14px" }}>⚠️ {BROWSER.micWarning}</p>}
+
+        <button onClick={onLogin} style={{ background:"linear-gradient(135deg,#4f46e5,#7c3aed)", border:"none", color:"#fff", borderRadius:"12px", padding: isMobile?"13px 24px":"13px 30px", fontSize:".92rem", fontWeight:"600", cursor:"pointer", fontFamily:"'Segoe UI',inherit", boxShadow:"0 6px 28px rgba(99,102,241,.45)", touchAction:"manipulation" }}>
+          {t("loginBtn")}
+        </button>
+        <p style={{ marginTop:"10px", color:"#334155", fontSize:".72rem" }}>{t("freedays")}</p>
+
+        {/* Banderas decorativas en fila */}
+        <div style={{ display:"flex", gap:"6px", justifyContent:"center", flexWrap:"wrap", marginTop:"16px", fontSize:"1.3rem" }}>
+          {["🇦🇷","🇺🇸","🇧🇷","🇫🇷","🇩🇪","🇯🇵","🇨🇳","🇸🇦","🇷🇺","🇮🇹","🇲🇽","🇨🇴","🇨🇱","🇺🇾","🇵🇪"].map((f,i)=>(
+            <span key={i} style={{ filter:"drop-shadow(0 1px 3px rgba(0,0,0,.3))" }}>{f}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Billing toggle ── */}
+      <div style={{ display:"flex", justifyContent:"center", margin:"28px 0 16px" }}>
+        {["monthly","annual"].map(b=>(
+          <button key={b} onClick={()=>setBilling(b)} style={{ background:billing===b?"rgba(99,102,241,.2)":"transparent", border:billing===b?"1px solid rgba(99,102,241,.5)":"1px solid rgba(255,255,255,.08)", color:billing===b?"#a5b4fc":"#475569", padding:"7px 18px", cursor:"pointer", fontFamily:"inherit", fontSize:".8rem", borderRadius:b==="monthly"?"8px 0 0 8px":"0 8px 8px 0", transition:"all .2s", touchAction:"manipulation" }}>
+            {t(b === "monthly" ? "monthly" : "annual")}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Plans ── */}
+      <div style={{ padding:"0 16px 52px" }}>
         <div style={{
           display: "flex", gap: "14px",
           overflowX: "auto",
@@ -1042,23 +1318,6 @@ function LandingScreen({ onLogin, onTrial, onChangePlan, isLoggedIn }) {
         </div>
         {<p style={{ textAlign:"center", color:"#334155", fontSize:".68rem", margin:"6px 0 0" }}>← Deslizá para ver todos los planes →</p>}
       </div>
-
-      {/* ── Contador de usuarios ── */}
-      <UserCounter />
-
-      {/* ── Globalmeeteros — PRIMERO ── */}
-      <GlobalmeeteroSection />
-
-      {/* ── Billing toggle ── */}
-      <div style={{ display:"flex", justifyContent:"center", marginBottom:"24px" }}>
-        {["monthly","annual"].map(b => (
-          <button key={b} onClick={() => setBilling(b)} style={{ background: billing===b ? "rgba(99,102,241,.2)" : "transparent", border: billing===b ? "1px solid rgba(99,102,241,.5)" : "1px solid rgba(255,255,255,.08)", color: billing===b ? "#a5b4fc" : "#475569", padding: "7px 18px", cursor: "pointer", fontFamily: "inherit", fontSize: ".8rem", borderRadius: b==="monthly" ? "8px 0 0 8px" : "0 8px 8px 0", transition: "all .2s", touchAction: "manipulation" }}>
-            {b === "monthly" ? "Mensual" : "Anual −15%"}
-          </button>
-        ))}
-      </div>
-
-      {/* ── Plans ── */}
 
       {/* ── Seguridad ── */}
       <SecuritySection />
@@ -2467,6 +2726,7 @@ function EarpieceRoom({ config, onBack, onGoHome }) {
 // ROOT
 // ══════════════════════════════════════════════════════════════════════════════
 export default function App() {
+  const langCtx = useAppLang();
   const [screen,      setScreen]      = useState("landing");
   const [user,        setUser]        = useState(null);
   const [plan,        setPlan]        = useState({ id:"trial" });
@@ -2475,43 +2735,24 @@ export default function App() {
   const [hasEarpiece, setHasEarpiece] = useState(false);
   const [chatCfg,     setChatCfg]     = useState(null);
 
-  // Detectar sesión existente al cargar y manejar redirect de sala
   useEffect(() => {
-    // Detectar código de sala en la URL — funciona tanto en ?room= como después del redirect OAuth
     const urlParams = new URLSearchParams(window.location.search);
     const roomCode  = urlParams.get("room");
     if (roomCode) {
-      try { 
-        localStorage.setItem("gm_pending_room", roomCode);
-        // Limpiar la URL para que no quede el código visible
-        window.history.replaceState({}, document.title, "/");
-      } catch {}
+      try { localStorage.setItem("gm_pending_room", roomCode); window.history.replaceState({}, document.title, "/"); } catch {}
     }
-
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        const { data: userData } = await supabase
-          .from("users").select("*").eq("id", session.user.id).single();
+        const { data: userData } = await supabase.from("users").select("*").eq("id", session.user.id).single();
         if (userData) {
-          setUser({
-            id:       userData.id,
-            email:    userData.email,
-            name:     userData.name,
-            planId:   userData.plan_id,
-            planEnd:  new Date(userData.plan_end),
-            joinedAt: new Date(userData.created_at),
-          });
+          setUser({ id:userData.id, email:userData.email, name:userData.name, planId:userData.plan_id, planEnd:new Date(userData.plan_end), joinedAt:new Date(userData.created_at) });
           setPlan({ id: userData.plan_id || "trial" });
-
-          // Si hay sala pendiente, ir directo
           const pendingRoom = localStorage.getItem("gm_pending_room");
           if (pendingRoom) {
             localStorage.removeItem("gm_pending_room");
-            setChatCfg({ roomCode: pendingRoom, count: 2, hasVideo: false, hasEarpiece: false, names: { A: userData.name, B: "Participante B" }, langs: { A: "es", B: "en" }, myKey: `P${Date.now().toString(36).slice(-4).toUpperCase()}` });
+            setChatCfg({ roomCode:pendingRoom, count:2, hasVideo:false, hasEarpiece:false, names:{A:userData.name,B:"B"}, langs:{A:"es",B:"en"}, myKey:`P${Date.now().toString(36).slice(-4).toUpperCase()}` });
             setScreen("joinRoom");
-          } else {
-            setScreen("dashboard");
-          }
+          } else { setScreen("dashboard"); }
         }
       }
     });
@@ -2519,53 +2760,37 @@ export default function App() {
 
   const handleLogin = u => {
     let selectedPlan = "trial";
-    try {
-      const saved = localStorage.getItem("gm_selected_plan");
-      if (saved) { selectedPlan = saved; localStorage.removeItem("gm_selected_plan"); }
-    } catch {}
-
+    try { const s=localStorage.getItem("gm_selected_plan"); if(s){selectedPlan=s;localStorage.removeItem("gm_selected_plan");} } catch {}
     setUser({ ...u, joinedAt: u.joinedAt || new Date() });
     setPlan({ id: u.planId || selectedPlan });
-
-    // Si hay sala pendiente, ir directo
     try {
       const pendingRoom = localStorage.getItem("gm_pending_room");
       if (pendingRoom) {
         localStorage.removeItem("gm_pending_room");
-        setChatCfg({ roomCode: pendingRoom, count: 2, hasVideo: false, hasEarpiece: false, names: { A: u.name, B: "Participante B" }, langs: { A: "es", B: "en" } });
-        setScreen("joinRoom");
-        return;
+        setChatCfg({ roomCode:pendingRoom, count:2, hasVideo:false, hasEarpiece:false, names:{A:u.name,B:"B"}, langs:{A:"es",B:"en"}, myKey:`P${Date.now().toString(36).slice(-4).toUpperCase()}` });
+        setScreen("joinRoom"); return;
       }
     } catch {}
-
     setScreen("dashboard");
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    setUser(null);
-    setPlan({ id: "trial" });
+    setUser(null); setPlan({ id:"trial" });
     window.history.replaceState({}, document.title, "/");
     setScreen("landing");
   };
 
-  // Cambiar plan — actualiza en Supabase y en el estado local
   const handleChangePlan = async (newPlanId) => {
     if (!user?.id) { setScreen("landing"); return; }
-    const planDays = newPlanId === "trial" ? 14 : 7;
-    const planEnd  = new Date(Date.now() + planDays * 86400000).toISOString();
-    await supabase.from("users").update({
-      plan_id:  newPlanId,
-      plan_end: planEnd,
-    }).eq("id", user.id);
-    setPlan({ id: newPlanId });
-    setScreen("dashboard");
+    const planEnd = new Date(Date.now() + (newPlanId==="trial"?14:7)*86400000).toISOString();
+    await supabase.from("users").update({ plan_id:newPlanId, plan_end:planEnd }).eq("id", user.id);
+    setPlan({ id: newPlanId }); setScreen("dashboard");
   };
 
   const handleStart = (count, video, earpiece) => {
-    if (plan.id === "trial" && isTrialExpired(user)) { setScreen("trialExpired"); return; }
-    setRoomCount(count); setHasVideo(video); setHasEarpiece(earpiece || false);
-    setScreen("roomSetup");
+    if (plan.id==="trial" && isTrialExpired(user)) { setScreen("trialExpired"); return; }
+    setRoomCount(count); setHasVideo(video); setHasEarpiece(earpiece||false); setScreen("roomSetup");
   };
 
   const handleLaunch = cfg => {
@@ -2575,14 +2800,17 @@ export default function App() {
     else setScreen("chat");
   };
 
-  if (screen === "landing")      return <LandingScreen onLogin={() => setScreen("login")} onTrial={(planId) => { if (planId) { try { localStorage.setItem("gm_selected_plan", planId); } catch {} } setScreen("login"); }} onChangePlan={handleChangePlan} isLoggedIn={!!user} />;
-  if (screen === "login")        return <LoginScreen onLogin={handleLogin} />;
-  if (screen === "trialExpired") return <TrialExpiredWall onGoPlans={() => setScreen("landing")} />;
-  if (screen === "dashboard")    return <Dashboard user={user} plan={plan} onStartRoom={handleStart} onGoPlans={() => setScreen("landing")} onLogout={handleLogout} />;
-  if (screen === "roomSetup")    return <RoomSetup count={roomCount} hasVideo={hasVideo} hasEarpiece={hasEarpiece} user={user} onStart={handleLaunch} onBack={() => setScreen("dashboard")} prefilledRoomCode={chatCfg?.roomCode} />;
-  if (screen === "joinRoom")     return <JoinRoom config={chatCfg} user={user} onJoin={handleLaunch} onBack={() => setScreen("landing")} />;
-  if (screen === "chat")         return <ChatRoom config={chatCfg} onBack={() => setScreen("dashboard")} onGoHome={() => setScreen("landing")} />;
-  if (screen === "enterprise")   return <EnterpriseRoom config={chatCfg} onBack={() => setScreen("dashboard")} onGoHome={() => setScreen("landing")} />;
-  if (screen === "earpiece")     return <EarpieceRoom config={chatCfg} onBack={() => setScreen("dashboard")} onGoHome={() => setScreen("landing")} />;
-  return null;
+  return (
+    <LangContext.Provider value={langCtx}>
+      {screen==="landing"      && <LandingScreen onLogin={()=>setScreen("login")} onTrial={(planId)=>{ if(planId){try{localStorage.setItem("gm_selected_plan",planId);}catch{}} setScreen("login"); }} onChangePlan={handleChangePlan} isLoggedIn={!!user} />}
+      {screen==="login"        && <LoginScreen onLogin={handleLogin} />}
+      {screen==="trialExpired" && <TrialExpiredWall onGoPlans={()=>setScreen("landing")} />}
+      {screen==="dashboard"    && <Dashboard user={user} plan={plan} onStartRoom={handleStart} onGoPlans={()=>setScreen("landing")} onLogout={handleLogout} />}
+      {screen==="roomSetup"    && <RoomSetup count={roomCount} hasVideo={hasVideo} hasEarpiece={hasEarpiece} user={user} onStart={handleLaunch} onBack={()=>setScreen("dashboard")} prefilledRoomCode={chatCfg?.roomCode} />}
+      {screen==="joinRoom"     && <JoinRoom config={chatCfg} user={user} onJoin={handleLaunch} onBack={()=>setScreen("landing")} />}
+      {screen==="chat"         && <ChatRoom config={chatCfg} onBack={()=>setScreen("dashboard")} onGoHome={()=>setScreen("landing")} />}
+      {screen==="enterprise"   && <EnterpriseRoom config={chatCfg} onBack={()=>setScreen("dashboard")} onGoHome={()=>setScreen("landing")} />}
+      {screen==="earpiece"     && <EarpieceRoom config={chatCfg} onBack={()=>setScreen("dashboard")} onGoHome={()=>setScreen("landing")} />}
+    </LangContext.Provider>
+  );
 }
