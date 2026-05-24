@@ -125,16 +125,16 @@ const LANGUAGES = [
 ];
 
 const PLANS = [
-  { id: "trial",      name: "Prueba",     emoji: "🎁", badge: "14 días gratis",      priceMonthly: 0,                         priceAnnual: 0,                         color: "#64748b", accent: "#94a3b8", participants: 2, hasVideo: false, hasEarpiece: false, mpLink: null,                  usd: null,       trialDays: 14,
+  { id: "trial",      name: "Prueba",     emoji: "🎁", badge: "14 días gratis",      priceMonthly: 0,                         priceAnnual: 0,                         color: "#64748b", accent: "#94a3b8", participants: 2,  hasVideo: false, hasEarpiece: false, mpLink: null,                  usd: null,       trialDays: 14,
     features: ["2 participantes", "Traducción en tiempo real", "10 idiomas", "Sin tarjeta de crédito"] },
-  { id: "basic",      name: "Básico",     emoji: "💼", badge: "7 días gratis",        priceMonthly: PRECIOS.basic.mensual,      priceAnnual: PRECIOS.basic.anual,       color: "#2563eb", accent: "#60a5fa", participants: 2, hasVideo: false, hasEarpiece: false, mpLink: MP_LINKS.basic,        usd: "~USD 10",  trialDays: 7,
+  { id: "basic",      name: "Básico",     emoji: "💼", badge: "7 días gratis",        priceMonthly: PRECIOS.basic.mensual,      priceAnnual: PRECIOS.basic.anual,       color: "#2563eb", accent: "#60a5fa", participants: 2,  hasVideo: false, hasEarpiece: false, mpLink: MP_LINKS.basic,        usd: "~USD 10",  trialDays: 7,
     features: ["🎁 7 días gratis para probar", "2 participantes", "Conversaciones ilimitadas", "10 idiomas", "Link compartible", "Historial", "Notificaciones email"] },
-  { id: "pro",        name: "Pro",        emoji: "🚀", badge: "7 días gratis",        priceMonthly: PRECIOS.pro.mensual,        priceAnnual: PRECIOS.pro.anual,         color: "#7c3aed", accent: "#a78bfa", participants: 3, hasVideo: false, hasEarpiece: false, mpLink: MP_LINKS.pro,          usd: "~USD 17",  trialDays: 7,
+  { id: "pro",        name: "Pro",        emoji: "🚀", badge: "7 días gratis",        priceMonthly: PRECIOS.pro.mensual,        priceAnnual: PRECIOS.pro.anual,         color: "#7c3aed", accent: "#a78bfa", participants: 3,  hasVideo: false, hasEarpiece: false, mpLink: MP_LINKS.pro,          usd: "~USD 17",  trialDays: 7,
     features: ["🎁 7 días gratis para probar", "3 participantes", "Conversaciones ilimitadas", "10 idiomas", "Link compartible", "Historial", "Notificaciones email", "Soporte prioritario"] },
   { id: "enterprise", name: "Enterprise", emoji: "🎥", badge: "7 días gratis",        priceMonthly: PRECIOS.enterprise.mensual, priceAnnual: PRECIOS.enterprise.anual,  color: "#0f766e", accent: "#2dd4bf", participants: 30, hasVideo: true,  hasEarpiece: false, mpLink: MP_LINKS.enterprise,   usd: "~USD 32",  trialDays: 7,
-    features: ["🎁 7 días gratis para probar", "👥 Hasta 30 participantes", "📹 Videollamada Jitsi", "💬 Chat traductor", "🖥️ Compartir pantalla", `📁 Archivos hasta ${MAX_FILE_MB}MB`, "10 idiomas", "Soporte 24/7"] },
+    features: ["🎁 7 días gratis para probar", "👥 2, 3 o hasta 30 participantes", "📹 Videollamada Jitsi", "💬 Chat traductor", "🖥️ Compartir pantalla", `📁 Archivos hasta ${MAX_FILE_MB}MB`, "10 idiomas", "🌍 Comunidad Globalmeeteros", "Soporte 24/7"] },
   { id: "auricular",  name: "Auricular",  emoji: "🎧", badge: "7 días gratis",        priceMonthly: PRECIOS.auricular.mensual, priceAnnual: PRECIOS.auricular.anual,   color: "#b45309", accent: "#fbbf24", participants: 30, hasVideo: false, hasEarpiece: true,  mpLink: MP_LINKS.auricular,    usd: "~USD 42",  trialDays: 7,
-    features: ["🎁 7 días gratis para probar", "👥 Hasta 30 participantes", "🎧 Traducción simultánea por auricular", "🗣️ Voz masculina o femenina", "🎙️ Comando 'Hola GlobalMeet'", "Manos libres · sin tocar pantalla", "10 idiomas en tiempo real", "Funciona con cualquier auricular Bluetooth", "Soporte 24/7"] },
+    features: ["🎁 7 días gratis para probar", "👥 2, 3 o hasta 30 participantes", "🎧 Traducción simultánea por auricular", "🔊 Modo altavoz o solo texto", "🗣️ Voz masculina o femenina", "🎙️ Comando 'Hola GlobalMeet'", "Manos libres · sin tocar pantalla", "10 idiomas en tiempo real", "🌍 Comunidad Globalmeeteros", "Soporte 24/7"] },
 ];
 
 const SPK = {
@@ -697,87 +697,126 @@ function LandingChatBot() {
   const [messages, setMessages] = useState([]);
   const [input,    setInput]    = useState("");
   const [loading,  setLoading]  = useState(false);
+  const [bubble,   setBubble]   = useState(true); // globo de bienvenida
   const bottomRef = useRef(null);
 
-  const SYSTEM_PROMPT = `Sos el asistente virtual de GlobalMeet, una plataforma SaaS de chat empresarial con traducción simultánea en tiempo real diseñada por Momentos (Argentina).
+  const WELCOMES = {
+    es: "👋 ¡Hola! ¿En qué te puedo ayudar?",
+    en: "👋 Hi! How can I help you?",
+    pt: "👋 Olá! Como posso ajudar?",
+    fr: "👋 Bonjour! Comment puis-je vous aider?",
+    de: "👋 Hallo! Wie kann ich helfen?",
+    it: "👋 Ciao! Come posso aiutarti?",
+    ja: "👋 こんにちは！どのようにお手伝いできますか？",
+    zh: "👋 您好！有什么可以帮助您的？",
+    ar: "👋 مرحباً! كيف يمكنني مساعدتك؟",
+    ru: "👋 Привет! Чем могу помочь?",
+  };
 
-Respondé SIEMPRE en el idioma del usuario. Si el usuario escribe en inglés, respondé en inglés. Si escribe en español, respondé en español.
+  const SYSTEM_PROMPT = `Sos el asistente virtual de GlobalMeet, plataforma SaaS de chat empresarial con traducción simultánea diseñada por Momentos (Argentina).
 
-Información clave de GlobalMeet:
-- Planes: Prueba (gratis 14 días), Básico ($14.900/mes, 2 participantes), Pro ($24.900/mes, 3 participantes), Enterprise ($44.900/mes, hasta 30 personas + video Jitsi), Auricular ($59.900/mes, hasta 30 personas + traducción por auricular manos libres)
-- 10 idiomas: Español, Inglés, Portugués, Francés, Alemán, Italiano, Japonés, Chino, Árabe, Ruso
-- Todos los planes pagos tienen 7 días de prueba gratis
-- Descuento anual del 15%
-- Pago por Mercado Pago o transferencia bancaria
-- Funciona en Chrome y Edge (micrófono). En iPhone solo texto.
-- Comando de voz "Hola GlobalMeet" para activar el modo auricular
-- URL: https://globalmeet-six.vercel.app
-- Soporte: germanmomentos@gmail.com
+Respondé SIEMPRE en el idioma del usuario.
 
-Podés hacer demostraciones mostrando ejemplos de cómo funciona la traducción.
-Sé amigable, conciso y útil. Máximo 3 párrafos por respuesta.`;
+Info clave:
+- Planes: Prueba (gratis 14d), Básico ($14.900/mes, 2 personas), Pro ($24.900/mes, 3 personas), Enterprise ($44.900/mes, hasta 30 + video), Auricular ($59.900/mes, hasta 30 + auricular manos libres)
+- 10 idiomas. 7 días gratis en planes pagos. Descuento anual 15%.
+- Pago: Mercado Pago o transferencia bancaria (CVU: 0000003100067143702619, alias: german.momentos)
+- Chrome/Edge tienen micrófono. iPhone solo texto.
+- Comando "Hola GlobalMeet" activa el auricular.
+- URL: https://globalmeet-six.vercel.app — Soporte: germanmomentos@gmail.com
+- Comunidad: "Globalmeeteros" — profesionales que rompen barreras del idioma.
 
+Sé amigable y conciso. Máximo 2-3 párrafos.`;
+
+  // Mostrar globo de bienvenida al cargar
+  useEffect(() => {
+    const timer = setTimeout(() => setBubble(true), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Inicializar chat con bienvenida al abrir
   useEffect(() => {
     if (open && messages.length === 0) {
-      const welcomes = {
-        es: "👋 ¡Hola! Soy el asistente de GlobalMeet. ¿En qué te puedo ayudar? Puedo contarte sobre los planes, cómo funciona la traducción, o hacer una demo.",
-        en: "👋 Hi! I'm GlobalMeet's assistant. How can I help you? I can tell you about plans, how translation works, or run a demo.",
-        pt: "👋 Olá! Sou o assistente do GlobalMeet. Como posso ajudar?",
-        fr: "👋 Bonjour! Je suis l'assistant de GlobalMeet. Comment puis-je vous aider?",
-        de: "👋 Hallo! Ich bin der GlobalMeet-Assistent. Wie kann ich helfen?",
-        it: "👋 Ciao! Sono l'assistente di GlobalMeet. Come posso aiutarti?",
-        ja: "👋 こんにちは！GlobalMeetのアシスタントです。どのようにお手伝いできますか？",
-        zh: "👋 您好！我是GlobalMeet助手。有什么可以帮助您的？",
-        ar: "👋 مرحباً! أنا مساعد GlobalMeet. كيف يمكنني مساعدتك؟",
-        ru: "👋 Привет! Я ассистент GlobalMeet. Чем могу помочь?",
-      };
-      setMessages([{ role:"assistant", text: welcomes[lang] || welcomes.es }]);
+      setMessages([{ role:"assistant", text: WELCOMES[lang] || WELCOMES.es }]);
     }
-  }, [open, lang]);
+  }, [open]);
+
+  // Cambiar idioma — resetear chat
+  useEffect(() => {
+    if (messages.length > 0) {
+      setMessages([{ role:"assistant", text: WELCOMES[lang] || WELCOMES.es }]);
+    }
+  }, [lang]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages]);
 
   const send = async () => {
     if (!input.trim() || loading) return;
-    const userMsg = input.trim(); setInput(""); setLoading(true);
+    const userMsg = input.trim();
+    setInput("");
+    setLoading(true);
     setMessages(prev => [...prev, { role:"user", text:userMsg }]);
+
     try {
-      const res  = await fetch("https://api.anthropic.com/v1/messages", {
-        method:"POST", headers:{"Content-Type":"application/json"},
+      const history = messages.slice(-6).map(m => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.text
+      }));
+
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
         body: JSON.stringify({
-          model:"claude-sonnet-4-20250514", max_tokens:600,
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 500,
           system: SYSTEM_PROMPT,
-          messages: [...messages.map(m=>({ role:m.role==="assistant"?"assistant":"user", content:m.text })), { role:"user", content:userMsg }],
+          messages: [...history, { role:"user", content:userMsg }],
         })
       });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       const text = data?.content?.[0]?.text || "No pude responder. Intentá de nuevo.";
       setMessages(prev => [...prev, { role:"assistant", text }]);
-    } catch {
-      setMessages(prev => [...prev, { role:"assistant", text:"Error de conexión. Intentá de nuevo." }]);
-    } finally { setLoading(false); }
+    } catch (e) {
+      setMessages(prev => [...prev, { role:"assistant", text:"Lo siento, hubo un error. Intentá de nuevo en unos segundos." }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
+      {/* Globo de bienvenida */}
+      {bubble && !open && (
+        <div style={{ position:"fixed", bottom:"88px", right:"24px", background:"linear-gradient(135deg,#4f46e5,#7c3aed)", borderRadius:"12px 12px 4px 12px", padding:"10px 14px", color:"#fff", fontSize:".8rem", fontWeight:"500", zIndex:499, maxWidth:"200px", boxShadow:"0 4px 20px rgba(99,102,241,.4)", cursor:"pointer", animation:"popIn .4s ease" }} onClick={()=>{ setOpen(true); setBubble(false); }}>
+          <style>{`@keyframes popIn{from{opacity:0;transform:scale(.8) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}`}</style>
+          👋 ¡Hola! ¿En qué te puedo ayudar?
+          <button onClick={e=>{e.stopPropagation();setBubble(false);}} style={{ position:"absolute", top:"-6px", right:"-6px", background:"#475569", border:"none", color:"#fff", borderRadius:"50%", width:"16px", height:"16px", fontSize:".55rem", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
+        </div>
+      )}
+
       {/* Botón flotante */}
-      <button onClick={() => setOpen(p=>!p)} style={{ position:"fixed", bottom:"24px", right:"24px", width:"56px", height:"56px", borderRadius:"50%", background:"linear-gradient(135deg,#4f46e5,#7c3aed)", border:"none", color:"#fff", fontSize:"1.4rem", cursor:"pointer", boxShadow:"0 4px 20px rgba(99,102,241,.5)", zIndex:500, display:"flex", alignItems:"center", justifyContent:"center", touchAction:"manipulation" }}>
+      <button onClick={() => { setOpen(p=>!p); setBubble(false); }} style={{ position:"fixed", bottom:"24px", right:"24px", width:"56px", height:"56px", borderRadius:"50%", background:"linear-gradient(135deg,#4f46e5,#7c3aed)", border:"none", color:"#fff", fontSize:"1.4rem", cursor:"pointer", boxShadow:"0 4px 20px rgba(99,102,241,.5)", zIndex:500, display:"flex", alignItems:"center", justifyContent:"center", touchAction:"manipulation" }}>
         {open ? "✕" : "💬"}
       </button>
 
       {/* Chat panel */}
       {open && (
         <div style={{ position:"fixed", bottom:"90px", right:"24px", width:"320px", maxWidth:"calc(100vw - 32px)", background:"#0f172a", border:"1px solid rgba(99,102,241,.3)", borderRadius:"16px", boxShadow:"0 20px 60px rgba(0,0,0,.6)", zIndex:500, display:"flex", flexDirection:"column", overflow:"hidden", maxHeight:"480px" }}>
-          {/* Header con selector de idioma */}
+          {/* Header */}
           <div style={{ background:"linear-gradient(135deg,#4f46e5,#7c3aed)", padding:"12px 14px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
             <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
               <span style={{ fontSize:"1.1rem" }}>🤖</span>
               <div>
                 <div style={{ color:"#fff", fontWeight:"600", fontSize:".85rem" }}>Asistente GlobalMeet</div>
-                <div style={{ color:"rgba(255,255,255,.7)", fontSize:".65rem" }}>Con IA · Responde en tu idioma</div>
+                <div style={{ color:"rgba(255,255,255,.7)", fontSize:".65rem" }}>Responde en tu idioma</div>
               </div>
             </div>
-            <select value={lang} onChange={e=>{ setLang(e.target.value); setMessages([]); }} style={{ background:"rgba(255,255,255,.2)", border:"none", color:"#fff", borderRadius:"6px", padding:"3px 6px", fontSize:".72rem", cursor:"pointer", outline:"none" }}>
+            <select value={lang} onChange={e=>setLang(e.target.value)} style={{ background:"rgba(255,255,255,.2)", border:"none", color:"#fff", borderRadius:"6px", padding:"3px 6px", fontSize:".72rem", cursor:"pointer", outline:"none" }}>
               {LANDING_LANGS.map(l => (
                 <option key={l.code} value={l.code} style={{ background:"#1e293b", color:"#fff" }}>{l.flag} {l.label}</option>
               ))}
@@ -804,7 +843,7 @@ Sé amigable, conciso y útil. Máximo 3 párrafos por respuesta.`;
 
           {/* Input */}
           <div style={{ padding:"10px", borderTop:"1px solid rgba(255,255,255,.07)", display:"flex", gap:"7px" }}>
-            <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Escribí tu pregunta..." style={{ flex:1, background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.1)", color:"#e2e8f0", borderRadius:"8px", padding:"8px 11px", fontSize:".8rem", outline:"none", fontFamily:"'Segoe UI',sans-serif" }}/>
+            <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&send()} placeholder="Escribí tu pregunta..." style={{ flex:1, background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.1)", color:"#e2e8f0", borderRadius:"8px", padding:"8px 11px", fontSize:".8rem", outline:"none", fontFamily:"'Segoe UI',sans-serif" }}/>
             <button onClick={send} disabled={loading||!input.trim()} style={{ background:"linear-gradient(135deg,#4f46e5,#7c3aed)", border:"none", color:"#fff", borderRadius:"8px", padding:"8px 12px", cursor:"pointer", fontSize:".8rem", opacity:loading||!input.trim()?.5:1, touchAction:"manipulation" }}>↑</button>
           </div>
         </div>
@@ -946,15 +985,6 @@ function LandingScreen({ onLogin, onTrial, onChangePlan, isLoggedIn }) {
         <p style={{ marginTop: "10px", color: "#334155", fontSize: ".72rem" }}>14 días gratis · Sin tarjeta de crédito</p>
       </div>
 
-      {/* Billing toggle */}
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
-        {["monthly","annual"].map(b => (
-          <button key={b} onClick={() => setBilling(b)} style={{ background: billing===b ? "rgba(99,102,241,.2)" : "transparent", border: billing===b ? "1px solid rgba(99,102,241,.5)" : "1px solid rgba(255,255,255,.08)", color: billing===b ? "#a5b4fc" : "#475569", padding: "7px 18px", cursor: "pointer", fontFamily: "inherit", fontSize: ".8rem", borderRadius: b==="monthly" ? "8px 0 0 8px" : "0 8px 8px 0", transition: "all .2s", touchAction: "manipulation" }}>
-            {b === "monthly" ? "Mensual" : "Anual −15%"}
-          </button>
-        ))}
-      </div>
-
       {/* Plans — horizontal scroll */}
       <div style={{ padding: "0 16px 52px" }}>
         <div style={{
@@ -1016,8 +1046,19 @@ function LandingScreen({ onLogin, onTrial, onChangePlan, isLoggedIn }) {
       {/* ── Contador de usuarios ── */}
       <UserCounter />
 
-      {/* ── Globalmeeteros ── */}
+      {/* ── Globalmeeteros — PRIMERO ── */}
       <GlobalmeeteroSection />
+
+      {/* ── Billing toggle ── */}
+      <div style={{ display:"flex", justifyContent:"center", marginBottom:"24px" }}>
+        {["monthly","annual"].map(b => (
+          <button key={b} onClick={() => setBilling(b)} style={{ background: billing===b ? "rgba(99,102,241,.2)" : "transparent", border: billing===b ? "1px solid rgba(99,102,241,.5)" : "1px solid rgba(255,255,255,.08)", color: billing===b ? "#a5b4fc" : "#475569", padding: "7px 18px", cursor: "pointer", fontFamily: "inherit", fontSize: ".8rem", borderRadius: b==="monthly" ? "8px 0 0 8px" : "0 8px 8px 0", transition: "all .2s", touchAction: "manipulation" }}>
+            {b === "monthly" ? "Mensual" : "Anual −15%"}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Plans ── */}
 
       {/* ── Seguridad ── */}
       <SecuritySection />
