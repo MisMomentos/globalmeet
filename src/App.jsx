@@ -595,6 +595,225 @@ function PlanButtons({ plan, onTrial, onNotify }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// GLOBALMEETEROS SECTION
+// ══════════════════════════════════════════════════════════════════════════════
+function GlobalmeeteroSection() {
+  const flags = ["🇦🇷","🇺🇸","🇧🇷","🇫🇷","🇩🇪","🇯🇵","🇨🇳","🇸🇦","🇷🇺","🇮🇹","🇲🇽","🇨🇴","🇨🇱","🇺🇾","🇵🇪"];
+  return (
+    <div style={{ maxWidth:"900px", margin:"0 auto", padding:"0 20px 52px", textAlign:"center", fontFamily:"'Segoe UI',system-ui,sans-serif" }}>
+      {/* Logo grande */}
+      <div style={{ display:"flex", justifyContent:"center", marginBottom:"24px" }}>
+        <div style={{ position:"relative" }}>
+          <div style={{ width:"120px", height:"120px", borderRadius:"50%", background:"radial-gradient(circle, rgba(99,102,241,.2), rgba(45,212,191,.1))", border:"2px solid rgba(99,102,241,.3)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto" }}>
+            <svg width="72" height="72" viewBox="0 0 48 48" fill="none">
+              <defs>
+                <linearGradient id="glg1" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#4f46e5"/><stop offset="100%" stopColor="#2dd4bf"/>
+                </linearGradient>
+                <linearGradient id="glg2" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#7c3aed"/><stop offset="100%" stopColor="#06b6d4"/>
+                </linearGradient>
+              </defs>
+              <circle cx="24" cy="24" r="24" fill="url(#glg1)" opacity="0.15"/>
+              <rect x="4" y="10" width="22" height="14" rx="7" fill="url(#glg1)"/>
+              <rect x="4" y="20" width="8" height="8" rx="2" fill="url(#glg1)" transform="rotate(45 8 24)"/>
+              <rect x="22" y="24" width="22" height="14" rx="7" fill="url(#glg2)"/>
+              <rect x="36" y="28" width="8" height="8" rx="2" fill="url(#glg2)" transform="rotate(45 40 34)"/>
+              <text x="7" y="20" fontSize="9" fill="white" fontFamily="Arial" fontWeight="bold">A</text>
+              <text x="27" y="34" fontSize="9" fill="white" fontFamily="Arial" fontWeight="bold">文</text>
+            </svg>
+          </div>
+          {/* Banderas orbitando */}
+          {flags.slice(0,8).map((flag,i) => {
+            const angle = (i/8)*360;
+            const rad   = angle*(Math.PI/180);
+            const r     = 70;
+            const x     = Math.cos(rad)*r;
+            const y     = Math.sin(rad)*r;
+            return (
+              <div key={i} style={{ position:"absolute", top:"50%", left:"50%", transform:`translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`, fontSize:"1.1rem", filter:"drop-shadow(0 2px 4px rgba(0,0,0,.3))" }}>
+                {flag}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <h2 style={{ color:"#f1f5f9", fontSize:"1.6rem", fontWeight:"700", margin:"0 0 8px" }}>
+        ¡Hola, Globalmeetero! 👋
+      </h2>
+      <p style={{ color:"#64748b", fontSize:".9rem", margin:"0 0 6px", lineHeight:"1.6" }}>
+        Somos una comunidad de profesionales que rompen barreras del idioma en sus negocios.
+      </p>
+      <p style={{ color:"#475569", fontSize:".82rem", margin:"0 0 20px" }}>
+        Desde Buenos Aires hasta Tokio — todos hablamos el mismo idioma: los negocios.
+      </p>
+
+      {/* Stats */}
+      <div style={{ display:"flex", gap:"16px", justifyContent:"center", flexWrap:"wrap", marginBottom:"20px" }}>
+        {[
+          { n:"10",   label:"Idiomas",           icon:"🌐" },
+          { n:"30",   label:"Personas por sala",  icon:"👥" },
+          { n:"24/7", label:"Disponible siempre", icon:"⏰" },
+          { n:"0",    label:"Barreras",           icon:"🚫" },
+        ].map((s,i) => (
+          <div key={i} style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.08)", borderRadius:"12px", padding:"14px 20px", minWidth:"100px" }}>
+            <div style={{ fontSize:"1.2rem", marginBottom:"2px" }}>{s.icon}</div>
+            <div style={{ color:"#a5b4fc", fontWeight:"700", fontSize:"1.3rem" }}>{s.n}</div>
+            <div style={{ color:"#475569", fontSize:".7rem" }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Flags row */}
+      <div style={{ display:"flex", gap:"8px", justifyContent:"center", flexWrap:"wrap" }}>
+        {flags.map((f,i) => (
+          <span key={i} style={{ fontSize:"1.4rem", filter:"drop-shadow(0 1px 3px rgba(0,0,0,.3))" }}>{f}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LANDING CHATBOT — asistente IA flotante con selector de idioma
+// ══════════════════════════════════════════════════════════════════════════════
+const LANDING_LANGS = [
+  { code:"es", label:"Español",   flag:"🇪🇸" },
+  { code:"en", label:"English",   flag:"🇺🇸" },
+  { code:"pt", label:"Português", flag:"🇧🇷" },
+  { code:"fr", label:"Français",  flag:"🇫🇷" },
+  { code:"de", label:"Deutsch",   flag:"🇩🇪" },
+  { code:"it", label:"Italiano",  flag:"🇮🇹" },
+  { code:"ja", label:"日本語",    flag:"🇯🇵" },
+  { code:"zh", label:"中文",      flag:"🇨🇳" },
+  { code:"ar", label:"العربية",  flag:"🇸🇦" },
+  { code:"ru", label:"Русский",   flag:"🇷🇺" },
+];
+
+function LandingChatBot() {
+  const [open,     setOpen]     = useState(false);
+  const [lang,     setLang]     = useState("es");
+  const [messages, setMessages] = useState([]);
+  const [input,    setInput]    = useState("");
+  const [loading,  setLoading]  = useState(false);
+  const bottomRef = useRef(null);
+
+  const SYSTEM_PROMPT = `Sos el asistente virtual de GlobalMeet, una plataforma SaaS de chat empresarial con traducción simultánea en tiempo real diseñada por Momentos (Argentina).
+
+Respondé SIEMPRE en el idioma del usuario. Si el usuario escribe en inglés, respondé en inglés. Si escribe en español, respondé en español.
+
+Información clave de GlobalMeet:
+- Planes: Prueba (gratis 14 días), Básico ($14.900/mes, 2 participantes), Pro ($24.900/mes, 3 participantes), Enterprise ($44.900/mes, hasta 30 personas + video Jitsi), Auricular ($59.900/mes, hasta 30 personas + traducción por auricular manos libres)
+- 10 idiomas: Español, Inglés, Portugués, Francés, Alemán, Italiano, Japonés, Chino, Árabe, Ruso
+- Todos los planes pagos tienen 7 días de prueba gratis
+- Descuento anual del 15%
+- Pago por Mercado Pago o transferencia bancaria
+- Funciona en Chrome y Edge (micrófono). En iPhone solo texto.
+- Comando de voz "Hola GlobalMeet" para activar el modo auricular
+- URL: https://globalmeet-six.vercel.app
+- Soporte: germanmomentos@gmail.com
+
+Podés hacer demostraciones mostrando ejemplos de cómo funciona la traducción.
+Sé amigable, conciso y útil. Máximo 3 párrafos por respuesta.`;
+
+  useEffect(() => {
+    if (open && messages.length === 0) {
+      const welcomes = {
+        es: "👋 ¡Hola! Soy el asistente de GlobalMeet. ¿En qué te puedo ayudar? Puedo contarte sobre los planes, cómo funciona la traducción, o hacer una demo.",
+        en: "👋 Hi! I'm GlobalMeet's assistant. How can I help you? I can tell you about plans, how translation works, or run a demo.",
+        pt: "👋 Olá! Sou o assistente do GlobalMeet. Como posso ajudar?",
+        fr: "👋 Bonjour! Je suis l'assistant de GlobalMeet. Comment puis-je vous aider?",
+        de: "👋 Hallo! Ich bin der GlobalMeet-Assistent. Wie kann ich helfen?",
+        it: "👋 Ciao! Sono l'assistente di GlobalMeet. Come posso aiutarti?",
+        ja: "👋 こんにちは！GlobalMeetのアシスタントです。どのようにお手伝いできますか？",
+        zh: "👋 您好！我是GlobalMeet助手。有什么可以帮助您的？",
+        ar: "👋 مرحباً! أنا مساعد GlobalMeet. كيف يمكنني مساعدتك؟",
+        ru: "👋 Привет! Я ассистент GlobalMeet. Чем могу помочь?",
+      };
+      setMessages([{ role:"assistant", text: welcomes[lang] || welcomes.es }]);
+    }
+  }, [open, lang]);
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages]);
+
+  const send = async () => {
+    if (!input.trim() || loading) return;
+    const userMsg = input.trim(); setInput(""); setLoading(true);
+    setMessages(prev => [...prev, { role:"user", text:userMsg }]);
+    try {
+      const res  = await fetch("https://api.anthropic.com/v1/messages", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          model:"claude-sonnet-4-20250514", max_tokens:600,
+          system: SYSTEM_PROMPT,
+          messages: [...messages.map(m=>({ role:m.role==="assistant"?"assistant":"user", content:m.text })), { role:"user", content:userMsg }],
+        })
+      });
+      const data = await res.json();
+      const text = data?.content?.[0]?.text || "No pude responder. Intentá de nuevo.";
+      setMessages(prev => [...prev, { role:"assistant", text }]);
+    } catch {
+      setMessages(prev => [...prev, { role:"assistant", text:"Error de conexión. Intentá de nuevo." }]);
+    } finally { setLoading(false); }
+  };
+
+  return (
+    <>
+      {/* Botón flotante */}
+      <button onClick={() => setOpen(p=>!p)} style={{ position:"fixed", bottom:"24px", right:"24px", width:"56px", height:"56px", borderRadius:"50%", background:"linear-gradient(135deg,#4f46e5,#7c3aed)", border:"none", color:"#fff", fontSize:"1.4rem", cursor:"pointer", boxShadow:"0 4px 20px rgba(99,102,241,.5)", zIndex:500, display:"flex", alignItems:"center", justifyContent:"center", touchAction:"manipulation" }}>
+        {open ? "✕" : "💬"}
+      </button>
+
+      {/* Chat panel */}
+      {open && (
+        <div style={{ position:"fixed", bottom:"90px", right:"24px", width:"320px", maxWidth:"calc(100vw - 32px)", background:"#0f172a", border:"1px solid rgba(99,102,241,.3)", borderRadius:"16px", boxShadow:"0 20px 60px rgba(0,0,0,.6)", zIndex:500, display:"flex", flexDirection:"column", overflow:"hidden", maxHeight:"480px" }}>
+          {/* Header con selector de idioma */}
+          <div style={{ background:"linear-gradient(135deg,#4f46e5,#7c3aed)", padding:"12px 14px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
+              <span style={{ fontSize:"1.1rem" }}>🤖</span>
+              <div>
+                <div style={{ color:"#fff", fontWeight:"600", fontSize:".85rem" }}>Asistente GlobalMeet</div>
+                <div style={{ color:"rgba(255,255,255,.7)", fontSize:".65rem" }}>Con IA · Responde en tu idioma</div>
+              </div>
+            </div>
+            <select value={lang} onChange={e=>{ setLang(e.target.value); setMessages([]); }} style={{ background:"rgba(255,255,255,.2)", border:"none", color:"#fff", borderRadius:"6px", padding:"3px 6px", fontSize:".72rem", cursor:"pointer", outline:"none" }}>
+              {LANDING_LANGS.map(l => (
+                <option key={l.code} value={l.code} style={{ background:"#1e293b", color:"#fff" }}>{l.flag} {l.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Messages */}
+          <div style={{ flex:1, overflowY:"auto", padding:"12px", display:"flex", flexDirection:"column", gap:"8px", WebkitOverflowScrolling:"touch" }}>
+            {messages.map((m,i) => (
+              <div key={i} style={{ display:"flex", justifyContent:m.role==="user"?"flex-end":"flex-start" }}>
+                <div style={{ maxWidth:"82%", background:m.role==="user"?"linear-gradient(135deg,#4f46e5,#7c3aed)":"rgba(255,255,255,.06)", border:m.role==="assistant"?"1px solid rgba(255,255,255,.08)":"none", borderRadius:m.role==="user"?"12px 12px 4px 12px":"12px 12px 12px 4px", padding:"8px 11px", color:"#e2e8f0", fontSize:".8rem", lineHeight:"1.5" }}>
+                  {m.text}
+                </div>
+              </div>
+            ))}
+            {loading && (
+              <div style={{ display:"flex", gap:"4px", padding:"8px 11px", background:"rgba(255,255,255,.06)", borderRadius:"12px 12px 12px 4px", width:"fit-content" }}>
+                {[0,1,2].map(i=><div key={i} style={{ width:"6px", height:"6px", borderRadius:"50%", background:"#64748b", animation:`bounce .8s ease-in-out ${i*.15}s infinite` }}/>)}
+                <style>{`@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}`}</style>
+              </div>
+            )}
+            <div ref={bottomRef}/>
+          </div>
+
+          {/* Input */}
+          <div style={{ padding:"10px", borderTop:"1px solid rgba(255,255,255,.07)", display:"flex", gap:"7px" }}>
+            <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Escribí tu pregunta..." style={{ flex:1, background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.1)", color:"#e2e8f0", borderRadius:"8px", padding:"8px 11px", fontSize:".8rem", outline:"none", fontFamily:"'Segoe UI',sans-serif" }}/>
+            <button onClick={send} disabled={loading||!input.trim()} style={{ background:"linear-gradient(135deg,#4f46e5,#7c3aed)", border:"none", color:"#fff", borderRadius:"8px", padding:"8px 12px", cursor:"pointer", fontSize:".8rem", opacity:loading||!input.trim()?.5:1, touchAction:"manipulation" }}>↑</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // SECURITY SECTION
 // ══════════════════════════════════════════════════════════════════════════════
 function SecuritySection() {
@@ -797,6 +1016,9 @@ function LandingScreen({ onLogin, onTrial, onChangePlan, isLoggedIn }) {
       {/* ── Contador de usuarios ── */}
       <UserCounter />
 
+      {/* ── Globalmeeteros ── */}
+      <GlobalmeeteroSection />
+
       {/* ── Seguridad ── */}
       <SecuritySection />
 
@@ -806,6 +1028,9 @@ function LandingScreen({ onLogin, onTrial, onChangePlan, isLoggedIn }) {
       <div style={{ textAlign:"center", color:"#1e293b", fontSize:".65rem", paddingBottom:"28px", letterSpacing:".1em" }}>
         {APP_NAME} · DISEÑADO POR MOMENTOS · POWERED BY CLAUDE AI
       </div>
+
+      {/* ── Chat IA flotante ── */}
+      <LandingChatBot />
     </div>
   );
 }
@@ -883,9 +1108,14 @@ function LoginScreen({ onLogin }) {
   const handleGoogle = async () => {
     setLoading(true);
     setErr("");
+    // Guardar roomCode en la URL de redirect para que no se pierda en mobile
+    const pendingRoom = localStorage.getItem("gm_pending_room") || "";
+    const redirectUrl = pendingRoom
+      ? `https://globalmeet-six.vercel.app?room=${pendingRoom}`
+      : "https://globalmeet-six.vercel.app";
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: "https://globalmeet-six.vercel.app" },
+      options: { redirectTo: redirectUrl },
     });
     if (error) { setErr("Error al conectar con Google."); setLoading(false); }
   };
@@ -1035,7 +1265,7 @@ function RoomSetup({ count, hasVideo, hasEarpiece, user, onStart, onBack, prefil
   // Limpiar sala al iniciar nueva
   const handleStart = (cfg) => {
     sessionStorage.removeItem("gm_current_room");
-    onStart(cfg);
+    onStart({ ...cfg, myKey: "A" });
   };
 
   return (
@@ -1194,106 +1424,151 @@ function usePresence(roomCode, userName) {
 // ══════════════════════════════════════════════════════════════════════════════
 // CHAT LOGIC HOOK
 // ══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+// CHAT LOGIC HOOK — participantes dinámicos via Supabase Presence
+// ══════════════════════════════════════════════════════════════════════════════
 function useChatLogic(config) {
-  const [messages,  setMessages]  = useState([]);
-  const [activeSpk, setActiveSpk] = useState(null);
-  const [interims,  setInterims]  = useState({ A:"", B:"", C:"" });
+  const [messages,        setMessages]        = useState([]);
+  const [activeSpk,       setActiveSpk]       = useState(null);
+  const [interims,        setInterims]        = useState({});
+  const [dynParticipants, setDynParticipants] = useState([]);
   const recRef = useRef(null);
-  const participants = ["A","B",...(config.count===3?["C"]:[])];
+  const myKey  = config.myKey || "A";
 
-  // Supabase Realtime — sync entre dispositivos
+  // Presence — participantes dinámicos
   useEffect(() => {
-    // Cargar mensajes existentes de la sala
+    const myName    = config.names?.[myKey] || "Usuario";
+    const myLangCode= config.langs?.[myKey] || "es";
+    const myLangObj = LANGUAGES.find(l => l.code === myLangCode);
+
+    const initial = [{ key:myKey, name:myName, lang:myLangCode, flag:myLangObj?.flag||"🌐", isMe:true }];
+    setDynParticipants(initial);
+
+    const ch = supabase.channel(`participants:${config.roomCode}`, {
+      config: { presence: { key: myKey } }
+    });
+    ch.on("presence", { event:"sync" }, () => {
+        const state = ch.presenceState();
+        const all = Object.entries(state).map(([key, arr]) => ({
+          key, name:arr[0]?.name||key, lang:arr[0]?.lang||"es",
+          flag:arr[0]?.flag||"🌐", isMe: key===myKey,
+        }));
+        setDynParticipants(all.length>0 ? all : initial);
+      })
+      .on("presence", { event:"join" }, ({ key }) => {
+        if (key !== myKey) { playJoinSound(); try{navigator.vibrate&&navigator.vibrate([100,50,100]);}catch{} }
+      })
+      .subscribe(async status => {
+        if (status==="SUBSCRIBED") {
+          await ch.track({ name:myName, lang:myLangCode, flag:myLangObj?.flag||"🌐" });
+        }
+      });
+    return () => { supabase.removeChannel(ch); };
+  }, [config.roomCode, myKey]);
+
+  // Mensajes Realtime
+  useEffect(() => {
     supabase.from("messages").select("*")
       .eq("room_code", config.roomCode)
-      .order("created_at", { ascending: true })
+      .order("created_at", { ascending:true })
       .then(({ data }) => {
         if (data) setMessages(data.map(m => ({
-          id: m.id, speaker: m.speaker, speakerName: m.speaker_name,
-          speakerFlag: m.speaker_flag, original: m.original,
-          translations: m.translations || {}, targetLangs: m.target_langs || {},
-          time: new Date(m.created_at).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }),
+          id:m.id, speaker:m.speaker, speakerName:m.speaker_name,
+          speakerFlag:m.speaker_flag, original:m.original,
+          translations:m.translations||{}, targetLangs:m.target_langs||{},
+          time:new Date(m.created_at).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}),
         })));
       });
-
-    // Escuchar mensajes nuevos en tiempo real
-    const channel = supabase.channel(`room:${config.roomCode}`)
-      .on("postgres_changes", { event:"*", schema:"public", table:"messages", filter:`room_code=eq.${config.roomCode}` },
-        (payload) => {
-          const m = payload.new;
-          if (!m) return;
-          const msg = {
-            id: m.id, speaker: m.speaker, speakerName: m.speaker_name,
-            speakerFlag: m.speaker_flag, original: m.original,
-            translations: m.translations || {}, targetLangs: m.target_langs || {},
-            time: new Date(m.created_at).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }),
+    const ch = supabase.channel(`room:${config.roomCode}`)
+      .on("postgres_changes",{event:"*",schema:"public",table:"messages",filter:`room_code=eq.${config.roomCode}`},
+        payload => {
+          const m=payload.new; if(!m) return;
+          const msg={
+            id:m.id, speaker:m.speaker, speakerName:m.speaker_name,
+            speakerFlag:m.speaker_flag, original:m.original,
+            translations:m.translations||{}, targetLangs:m.target_langs||{},
+            time:new Date(m.created_at).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}),
           };
-          if (payload.eventType === "INSERT") {
-            setMessages(prev => prev.find(x => x.id === msg.id) ? prev : [...prev, msg]);
-          } else if (payload.eventType === "UPDATE") {
-            setMessages(prev => prev.map(x => x.id === msg.id ? { ...x, ...msg } : x));
-          }
+          if(payload.eventType==="INSERT") setMessages(prev=>prev.find(x=>x.id===msg.id)?prev:[...prev,msg]);
+          else if(payload.eventType==="UPDATE") setMessages(prev=>prev.map(x=>x.id===msg.id?{...x,...msg}:x));
         }
       ).subscribe();
-
-    return () => { supabase.removeChannel(channel); };
+    return () => { supabase.removeChannel(ch); };
   }, [config.roomCode]);
 
-  const submitText = useCallback(async (spk, text) => {
+  const submitText = useCallback(async (spkKey, text) => {
     if (!text.trim()) return;
-    const myLang     = LANGUAGES.find(l => l.code === config.langs[spk]);
-    const others     = participants.filter(p => p !== spk);
-    const otherLangs = Object.fromEntries(others.map(p => [p, LANGUAGES.find(l => l.code === config.langs[p])]));
-
-    // Insertar en Supabase
-    const { data: inserted } = await supabase.from("messages").insert({
+    const myLangCode = dynParticipants.find(p=>p.key===spkKey)?.lang || config.langs?.[spkKey] || "es";
+    const myLang     = LANGUAGES.find(l=>l.code===myLangCode);
+    const others     = dynParticipants.filter(p=>p.key!==spkKey);
+    const otherLangs = Object.fromEntries(others.map(p=>[p.key, LANGUAGES.find(l=>l.code===p.lang)]));
+    const { data:inserted } = await supabase.from("messages").insert({
       room_code:    config.roomCode,
-      speaker:      spk,
-      speaker_name: config.names[spk],
+      speaker:      spkKey,
+      speaker_name: dynParticipants.find(p=>p.key===spkKey)?.name||spkKey,
       speaker_flag: myLang?.flag,
       original:     text.trim(),
       translations: {},
-      target_langs: Object.fromEntries(others.map(p => [p, { flag: otherLangs[p]?.flag, label: otherLangs[p]?.label }])),
+      target_langs: Object.fromEntries(others.map(p=>[p.key,{flag:otherLangs[p.key]?.flag,label:otherLangs[p.key]?.label}])),
     }).select().single();
-
     if (!inserted) return;
-
-    // Traducir y actualizar
     const translations = {};
     await Promise.all(others.map(async p => {
-      const t = await claudeTranslate(text.trim(), myLang?.label, otherLangs[p]?.label);
-      translations[p] = t;
+      const t = await claudeTranslate(text.trim(), myLang?.label, otherLangs[p.key]?.label);
+      translations[p.key] = t;
     }));
-
     await supabase.from("messages").update({ translations }).eq("id", inserted.id);
-  }, [config, participants]);
+  }, [config, dynParticipants]);
 
-  const toggleMic = useCallback(async spk => {
+  const toggleMic = useCallback(async spkKey => {
     if (!BROWSER.micOk) return;
     if (activeSpk) { recRef.current?.stop(); return; }
-    const SR  = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const myLangCode = dynParticipants.find(p=>p.key===spkKey)?.lang || config.langs?.[spkKey] || "es";
+    const SR  = window.SpeechRecognition||window.webkitSpeechRecognition;
     const rec = new SR();
-    rec.lang = LANGUAGES.find(l => l.code === config.langs[spk])?.bcp ?? "es-ES";
-    rec.continuous = true; rec.interimResults = true;
-    let final = "";
-    rec.onstart  = () => setActiveSpk(spk);
-    rec.onerror  = () => { setActiveSpk(null); setInterims(p => ({ ...p, [spk]:"" })); };
-    rec.onresult = e => {
-      let interim = ""; final = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) final += e.results[i][0].transcript + " ";
-        else interim += e.results[i][0].transcript;
+    rec.lang = LANGUAGES.find(l=>l.code===myLangCode)?.bcp??"es-ES";
+    rec.continuous=true; rec.interimResults=true;
+    let final="";
+    rec.onstart  = ()=>setActiveSpk(spkKey);
+    rec.onerror  = ()=>{ setActiveSpk(null); setInterims(p=>({...p,[spkKey]:""})); };
+    rec.onresult = e=>{
+      let interim=""; final="";
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        if(e.results[i].isFinal) final+=e.results[i][0].transcript+" ";
+        else interim+=e.results[i][0].transcript;
       }
-      setInterims(p => ({ ...p, [spk]: interim || final }));
+      setInterims(p=>({...p,[spkKey]:interim||final}));
     };
-    rec.onend = async () => {
-      setActiveSpk(null); setInterims(p => ({ ...p, [spk]:"" }));
-      if (final.trim()) await submitText(spk, final.trim());
+    rec.onend = async ()=>{
+      setActiveSpk(null); setInterims(p=>({...p,[spkKey]:""}));
+      if(final.trim()) await submitText(spkKey,final.trim());
     };
-    recRef.current = rec; rec.start();
-  }, [activeSpk, config, submitText]);
+    recRef.current=rec; rec.start();
+  }, [activeSpk, config, dynParticipants, submitText]);
 
-  return { messages, activeSpk, interims, participants, toggleMic, submitText };
+  return { messages, activeSpk, interims, participants:dynParticipants, toggleMic, submitText };
+}
+
+
+// ── DynMicBtn — botón de micrófono para participantes dinámicos ──────────────
+function DynMicBtn({ spkKey, participants, activeSpk, toggleMic, interims, colorIndex=0 }) {
+  const colors = ["#1d4ed8","#be185d","#047857","#7c3aed","#b45309","#0f766e","#0369a1","#9d174d"];
+  const lights = ["#60a5fa","#f472b6","#34d399","#a78bfa","#fbbf24","#2dd4bf","#38bdf8","#fb7185"];
+  const p      = participants.find(x=>x.key===spkKey);
+  if (!p) return null;
+  const base  = colors[colorIndex % colors.length];
+  const light = lights[colorIndex % lights.length];
+  const lang  = LANGUAGES.find(l=>l.code===p.lang);
+  const isA   = activeSpk===spkKey;
+  const isDis = activeSpk!==null&&!isA;
+
+  return (
+    <button onClick={()=>toggleMic(spkKey)} disabled={isDis} style={{ flex:1, minWidth:"70px", maxWidth:"120px", background:isA?`${base}28`:"rgba(255,255,255,.03)", border:`1.5px solid ${isA?base:"rgba(255,255,255,.07)"}`, borderRadius:"12px", padding:"10px 7px", cursor:isDis?"not-allowed":"pointer", opacity:isDis?.25:1, transition:"all .2s", display:"flex", flexDirection:"column", alignItems:"center", gap:"4px", fontFamily:"inherit", touchAction:"manipulation" }}>
+      <div style={{ width:"34px", height:"34px", borderRadius:"50%", background:isA?base:"rgba(255,255,255,.07)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:".88rem", boxShadow:isA?`0 0 14px ${base}88`:"none", transition:"all .2s" }}>{isA?"⏹":"🎤"}</div>
+      <div style={{ color:isA?light:"#94a3b8", fontWeight:"600", fontSize:".7rem", maxWidth:"80px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{p.name.split(" ")[0]}</div>
+      {isA ? <Waveform active bars={5} color={light}/> : <span style={{ color:"#334155", fontSize:".58rem" }}>{lang?.flag} {lang?.label}</span>}
+    </button>
+  );
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1305,15 +1580,17 @@ function ChatRoom({ config, onBack, onGoHome }) {
   const [copied,setCopied]=useState(false);
   const [joinNotif,  setJoinNotif]  = useState(null);
   const [confettiOn, setConfettiOn] = useState(false);
+  const [kicked,     setKicked]     = useState(false);
   const bottomRef=useRef(null);
+  const myKey = config.myKey || "A";
   useEffect(()=>{ bottomRef.current?.scrollIntoView({behavior:"smooth"}); },[messages,interims]);
 
   // Presence — detectar cuando alguien entra
-  const presenceList = usePresence(config.roomCode, config.names?.A || "Usuario");
+  const presenceList = usePresence(config.roomCode, config.names?.[myKey] || "Usuario");
   const prevPresence = useRef([]);
   useEffect(() => {
     const prev = prevPresence.current;
-    const newOnes = presenceList.filter(n => !prev.includes(n) && n !== (config.names?.A || "Usuario"));
+    const newOnes = presenceList.filter(n => !prev.includes(n) && n !== (config.names?.[myKey] || "Usuario"));
     if (newOnes.length > 0) {
       setJoinNotif(`${newOnes[0]} se unió a la sala`);
       setConfettiOn(true);
@@ -1322,11 +1599,35 @@ function ChatRoom({ config, onBack, onGoHome }) {
     prevPresence.current = presenceList;
   }, [presenceList]);
 
+  // Escuchar señales de moderación
+  useEffect(() => {
+    const ch = supabase.channel(`mod:${config.roomCode}`)
+      .on("broadcast", { event:"kick" }, ({ payload }) => {
+        if (payload.key === myKey) setKicked(true);
+      })
+      .on("broadcast", { event:"ban" }, ({ payload }) => {
+        if (payload.key === myKey) {
+          try { localStorage.setItem(`gm_banned_${config.roomCode}`, "1"); } catch {}
+          setKicked(true);
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [config.roomCode, myKey]);
+
+  if (kicked) return (
+    <div style={{ minHeight:"100vh", background:"#080c14", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Segoe UI',sans-serif", padding:"20px" }}>
+      <div style={{ textAlign:"center", maxWidth:"340px" }}>
+        <div style={{ fontSize:"3rem", marginBottom:"14px" }}>⛔</div>
+        <h2 style={{ color:"#f1f5f9", fontSize:"1.1rem", fontWeight:"600", marginBottom:"8px" }}>Fuiste removido de la sala</h2>
+        <p style={{ color:"#64748b", fontSize:".82rem", marginBottom:"20px" }}>El moderador te expulsó de esta conversación.</p>
+        <button onClick={onGoHome} style={{ background:"linear-gradient(135deg,#4f46e5,#7c3aed)", border:"none", color:"#fff", borderRadius:"10px", padding:"11px 24px", cursor:"pointer", fontFamily:"inherit", fontSize:".88rem", fontWeight:"600" }}>Volver al inicio</button>
+      </div>
+    </div>
+  );
+
   const roomLink=`${window.location.origin}?room=${config.roomCode}`;
   const copyLink=()=>{ navigator.clipboard.writeText(roomLink); setCopied(true); setTimeout(()=>setCopied(false),2000); };
-
-  // Mobile: show one mic at a time
-  const [activeMobile, setActiveMobile] = useState(null);
 
   return (
     <div style={{ height:"100dvh", background:"#080c14", display:"flex", flexDirection:"column", fontFamily:"'Segoe UI',system-ui,sans-serif", overflow:"hidden" }}>
@@ -1344,7 +1645,8 @@ function ChatRoom({ config, onBack, onGoHome }) {
         <div style={{ cursor:"pointer" }} onClick={onGoHome}>
           <AppLogo size={24} withText />
         </div>
-        <div style={{ display:"flex", gap:"6px" }}>
+        <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
+          <ModeratorPanel participants={participants} myKey={myKey} roomCode={config.roomCode} onKick={()=>{}} />
           <button onClick={copyLink} style={{ background:copied?"rgba(52,211,153,.1)":"rgba(99,102,241,.1)", border:`1px solid ${copied?"rgba(52,211,153,.3)":"rgba(99,102,241,.25)"}`, color:copied?"#34d399":"#818cf8", borderRadius:"7px", padding:"5px 9px", cursor:"pointer", fontSize:".66rem", fontFamily:"inherit", touchAction:"manipulation" }}>{copied?"✓":"🔗"}</button>
           <button onClick={onBack} style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.08)", color:"#475569", borderRadius:"7px", padding:"5px 9px", cursor:"pointer", fontSize:".66rem", fontFamily:"inherit", touchAction:"manipulation" }}>← Salir</button>
         </div>
@@ -1366,44 +1668,47 @@ function ChatRoom({ config, onBack, onGoHome }) {
       {/* Controls */}
       <div style={{ background:"rgba(8,12,20,.96)", borderTop:"1px solid rgba(255,255,255,.06)", flexShrink:0 }}>
         {BROWSER.micOk ? (
-          isMobile ? (
-            // Mobile: compact mic bar
-            <div style={{ padding:"10px 10px 12px" }}>
-              {activeMobile === null ? (
-                // Show participant selector
-                <div style={{ display:"flex", gap:"8px" }}>
-                  {participants.map(spk=>{
-                    const c=SPK[spk]; const lang=LANGUAGES.find(l=>l.code===config.langs[spk]);
-                    return (
-                      <button key={spk} onClick={()=>setActiveMobile(spk)} style={{ flex:1, background:`${c.base}18`, border:`1px solid ${c.border}`, borderRadius:"12px", padding:"10px 6px", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:"4px", fontFamily:"inherit", touchAction:"manipulation" }}>
-                        <div style={{ width:"32px", height:"32px", borderRadius:"50%", background:c.base, display:"flex", alignItems:"center", justifyContent:"center", fontSize:".85rem" }}>🎤</div>
-                        <div style={{ color:c.light, fontSize:".65rem", fontWeight:"600" }}>{config.names[spk].split(" ")[0]}</div>
-                        <span style={{ color:"#334155", fontSize:".58rem" }}>{lang?.flag}</span>
-                      </button>
-                    );
-                  })}
+          <div style={{ padding:"10px 12px 12px" }}>
+            {/* Solo el micrófono del participante actual */}
+            {(() => {
+              const myKey = config.myKey || "A";
+              const me = participants.find(p=>p.key===myKey) || participants[0];
+              if (!me) return null;
+              const idx = participants.findIndex(p=>p.key===myKey);
+              return (
+                <div style={{ display:"flex", gap:"10px", alignItems:"center", justifyContent:"center" }}>
+                  <DynMicBtn spkKey={me.key} participants={participants} activeSpk={activeSpk} toggleMic={toggleMic} interims={interims} colorIndex={idx}/>
+                  {/* Lista de otros participantes conectados */}
+                  {participants.filter(p=>p.key!==myKey).length > 0 && (
+                    <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
+                      {participants.filter(p=>p.key!==myKey).map((p,i)=>{
+                        const lang=LANGUAGES.find(l=>l.code===p.lang);
+                        const colors=["#be185d","#047857","#7c3aed","#b45309","#0f766e"];
+                        const c=colors[i%colors.length];
+                        return (
+                          <div key={p.key} style={{ background:`${c}18`, border:`1px solid ${c}33`, borderRadius:"10px", padding:"7px 10px", display:"flex", alignItems:"center", gap:"6px" }}>
+                            <div style={{ width:"24px", height:"24px", borderRadius:"50%", background:c, display:"flex", alignItems:"center", justifyContent:"center", fontSize:".7rem" }}>👤</div>
+                            <div>
+                              <div style={{ color:"#e2e8f0", fontSize:".7rem", fontWeight:"600" }}>{p.name.split(" ")[0]}</div>
+                              <div style={{ color:"#334155", fontSize:".58rem" }}>{lang?.flag}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              ) : (
-                // Active speaker mic
-                <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
-                  <MicBtn spk={activeMobile} config={config} activeSpk={activeSpk} toggleMic={toggleMic} />
-                  <button onClick={()=>{ recRef?.current?.stop(); setActiveMobile(null); }} style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.08)", color:"#475569", borderRadius:"8px", padding:"7px", cursor:"pointer", fontSize:".72rem", fontFamily:"inherit" }}>
-                    ← Cambiar participante
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            // Desktop: all mics visible
-            <div style={{ display:"flex", gap:"8px", justifyContent:"center", maxWidth:"780px", margin:"0 auto", padding:"11px 14px 13px" }}>
-              {participants.map(spk=><MicBtn key={spk} spk={spk} config={config} activeSpk={activeSpk} toggleMic={toggleMic}/>)}
-            </div>
-          )
+              );
+            })()}
+          </div>
         ) : (
-          participants.map(spk=>{
-            const lang=LANGUAGES.find(l=>l.code===config.langs[spk]);
-            return <TextInputFallback key={spk} placeholder={`${config.names[spk]} — ${lang?.label}...`} onSubmit={t=>submitText(spk,t)}/>;
-          })
+          (() => {
+            const myKey = config.myKey || "A";
+            const me = participants.find(p=>p.key===myKey) || participants[0];
+            if (!me) return null;
+            const lang=LANGUAGES.find(l=>l.code===me.lang);
+            return <TextInputFallback placeholder={`${me.name} — ${lang?.label}...`} onSubmit={t=>submitText(me.key,t)}/>;
+          })()
         )}
         <div style={{ textAlign:"center", color:"#1e293b", fontSize:".55rem", paddingBottom:"6px", letterSpacing:".08em" }}>{APP_NAME} · MOMENTOS</div>
       </div>
@@ -1421,12 +1726,13 @@ function JoinRoom({ config, user, onJoin, onBack }) {
 
   const join = () => {
     if (!myName.trim()) return;
-    // Determinar qué participante es (B o C)
-    const spk = "B";
+    // Generar una key única para este participante
+    const myKey = `P${Date.now().toString(36).slice(-4).toUpperCase()}`;
     onJoin({
       ...config,
-      names: { ...config.names, [spk]: myName.trim() },
-      langs: { ...config.langs, [spk]: myLang },
+      myKey,
+      names: { ...config.names, [myKey]: myName.trim() },
+      langs: { ...config.langs, [myKey]: myLang },
     });
   };
 
@@ -1576,15 +1882,46 @@ function EnterpriseRoom({ config, onBack }) {
 }
 
 // ── Bubbles ───────────────────────────────────────────────────────────────────
+// ── TTS helper ────────────────────────────────────────────────────────────────
+function speakText(text, langCode) {
+  try {
+    window.speechSynthesis.cancel();
+    const utt    = new SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices();
+    const voice  = voices.find(v=>v.lang.startsWith(langCode||"es"))||voices[0];
+    if (voice) utt.voice = voice;
+    utt.rate=0.95; utt.pitch=1; utt.volume=1;
+    window.speechSynthesis.speak(utt);
+  } catch {}
+}
+
 function ChatBubble({ msg, compact }) {
-  const c=SPK[msg.speaker]; const isA=msg.speaker==="A";
+  const c   = SPK[msg.speaker]||{ light:"#94a3b8", bg:"rgba(99,102,241,.18)", border:"rgba(99,102,241,.3)" };
+  const isA = msg.speaker==="A";
+  const [speaking, setSpeaking] = useState(false);
+
+  const handleSpeak = (text, langCode) => {
+    if (speaking) { window.speechSynthesis.cancel(); setSpeaking(false); return; }
+    setSpeaking(true);
+    window.speechSynthesis.cancel();
+    const utt    = new SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices();
+    const voice  = voices.find(v=>v.lang.startsWith(langCode||"es"))||voices[0];
+    if (voice) utt.voice = voice;
+    utt.rate=0.95; utt.onend=()=>setSpeaking(false); utt.onerror=()=>setSpeaking(false);
+    window.speechSynthesis.speak(utt);
+  };
+
   return (
     <div style={{ display:"flex", flexDirection:"column", alignItems:isA?"flex-start":"flex-end", marginBottom:compact?"8px":"12px", animation:"fadeIn .3s ease" }}>
       <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}`}</style>
       <div style={{ fontSize:".58rem", color:c.light, letterSpacing:".08em", textTransform:"uppercase", marginBottom:"2px", paddingLeft:"3px" }}>{msg.speakerName}</div>
       <div style={{ maxWidth:compact?"92%":"78%", background:c.bg, border:`1px solid ${c.border}`, borderRadius:isA?"4px 13px 13px 13px":"13px 4px 13px 13px", padding:compact?"7px 10px":"9px 12px", boxShadow:"0 2px 10px rgba(0,0,0,.3)" }}>
-        <div style={{ color:"#e2e8f0", fontSize:compact?".78rem":".87rem", lineHeight:"1.5" }}>
-          <span style={{ fontSize:".52rem", marginRight:"3px" }}>{msg.speakerFlag}</span>{msg.original}
+        <div style={{ color:"#e2e8f0", fontSize:compact?".78rem":".87rem", lineHeight:"1.5", display:"flex", alignItems:"center", gap:"4px", flexWrap:"wrap" }}>
+          <span><span style={{ fontSize:".52rem", marginRight:"3px" }}>{msg.speakerFlag}</span>{msg.original}</span>
+          <button onClick={()=>handleSpeak(msg.original, LANGUAGES.find(l=>l.flag===msg.speakerFlag)?.code||"es")} style={{ background:"none", border:"none", color:speaking?"#4ade80":"#334155", cursor:"pointer", fontSize:".72rem", padding:"0", flexShrink:0 }} title="Escuchar">
+            {speaking?"⏹":"🔊"}
+          </button>
         </div>
         {msg.translating && (
           <div style={{ marginTop:"4px", paddingTop:"4px", borderTop:"1px solid rgba(255,255,255,.06)", color:"#475569", fontSize:".68rem", display:"flex", alignItems:"center", gap:"4px" }}>
@@ -1594,10 +1931,13 @@ function ChatBubble({ msg, compact }) {
           </div>
         )}
         {!msg.translating && msg.translations && Object.entries(msg.translations).map(([spk,t])=>{
-          const tc=SPK[spk]; const tl=msg.targetLangs?.[spk]; const isErr=t?.startsWith("⚠️");
+          const tc=SPK[spk]||{light:"#94a3b8"}; const tl=msg.targetLangs?.[spk]; const isErr=t?.startsWith("⚠️");
           return (
-            <div key={spk} style={{ marginTop:"4px", paddingTop:"4px", borderTop:"1px solid rgba(255,255,255,.05)", color:isErr?"#ef4444":tc?.light??"#94a3b8", fontSize:compact?".7rem":".75rem", fontStyle:isErr?"normal":"italic", lineHeight:"1.4" }}>
-              <span style={{ fontSize:".5rem", marginRight:"3px" }}>{tl?.flag}</span>{t||<span style={{ color:"#334155" }}>…</span>}
+            <div key={spk} style={{ marginTop:"4px", paddingTop:"4px", borderTop:"1px solid rgba(255,255,255,.05)", color:isErr?"#ef4444":tc?.light??"#94a3b8", fontSize:compact?".7rem":".75rem", fontStyle:isErr?"normal":"italic", lineHeight:"1.4", display:"flex", alignItems:"center", gap:"4px" }}>
+              <span style={{ flex:1 }}><span style={{ fontSize:".5rem", marginRight:"3px" }}>{tl?.flag}</span>{t||<span style={{ color:"#334155" }}>…</span>}</span>
+              {t&&!isErr&&(
+                <button onClick={()=>handleSpeak(t, tl?.code||"en")} style={{ background:"none", border:"none", color:"#334155", cursor:"pointer", fontSize:".65rem", padding:"0", flexShrink:0 }} title="Escuchar traducción">🔊</button>
+              )}
             </div>
           );
         })}
@@ -1606,6 +1946,57 @@ function ChatBubble({ msg, compact }) {
     </div>
   );
 }
+
+// ── Moderator Panel ───────────────────────────────────────────────────────────
+function ModeratorPanel({ participants, myKey, roomCode, onKick }) {
+  const [open,   setOpen]   = useState(false);
+  const [banned, setBanned] = useState([]);
+  if (myKey !== "A" || participants.length <= 1) return null;
+
+  const sendMod = async (event, key) => {
+    try {
+      await supabase.channel(`mod:${roomCode}`).send({
+        type:"broadcast", event, payload:{ key }
+      });
+    } catch {}
+  };
+
+  const kick = async (key) => {
+    await sendMod("kick", key);
+    onKick && onKick(key);
+  };
+
+  const ban = async (key) => {
+    setBanned(prev=>[...prev,key]);
+    await sendMod("ban", key);
+    onKick && onKick(key);
+  };
+
+  return (
+    <div style={{ position:"relative" }}>
+      <button onClick={()=>setOpen(p=>!p)} style={{ background:"rgba(239,68,68,.1)", border:"1px solid rgba(239,68,68,.25)", color:"#f87171", borderRadius:"7px", padding:"5px 9px", cursor:"pointer", fontSize:".66rem", fontFamily:"inherit" }}>
+        👮 {open?"✕":"Moderar"}
+      </button>
+      {open && (
+        <div style={{ position:"absolute", top:"calc(100% + 6px)", right:0, background:"#0f172a", border:"1px solid rgba(255,255,255,.1)", borderRadius:"12px", padding:"12px", minWidth:"220px", zIndex:200, boxShadow:"0 10px 30px rgba(0,0,0,.5)" }}>
+          <div style={{ color:"#94a3b8", fontSize:".68rem", letterSpacing:".1em", marginBottom:"8px" }}>👮 MODERACIÓN</div>
+          {participants.filter(p=>p.key!==myKey).map(p=>(
+            <div key={p.key} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"6px 0", borderBottom:"1px solid rgba(255,255,255,.06)" }}>
+              <span style={{ color:"#cbd5e1", fontSize:".78rem" }}>{p.name} {p.flag}</span>
+              <div style={{ display:"flex", gap:"4px" }}>
+                <button onClick={()=>sendMod("mute",p.key)} style={{ background:"rgba(217,119,6,.15)", border:"1px solid rgba(217,119,6,.3)", color:"#fbbf24", borderRadius:"5px", padding:"3px 7px", cursor:"pointer", fontSize:".62rem", fontFamily:"inherit" }} title="Silenciar">🔇</button>
+                <button onClick={()=>kick(p.key)} style={{ background:"rgba(239,68,68,.15)", border:"1px solid rgba(239,68,68,.3)", color:"#f87171", borderRadius:"5px", padding:"3px 7px", cursor:"pointer", fontSize:".62rem", fontFamily:"inherit" }} title="Expulsar">⛔</button>
+                <button onClick={()=>ban(p.key)} style={{ background:"rgba(239,68,68,.25)", border:"1px solid rgba(239,68,68,.4)", color:"#ef4444", borderRadius:"5px", padding:"3px 7px", cursor:"pointer", fontSize:".62rem", fontFamily:"inherit" }} title="Bloquear reingreso">🚫</button>
+              </div>
+            </div>
+          ))}
+          <div style={{ color:"#1e293b", fontSize:".6rem", marginTop:"8px" }}>🔇 Silenciar · ⛔ Expulsar · 🚫 Bloquear</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 function InterimBubble({ text, speaker }) {
   const c=SPK[speaker];
@@ -1631,22 +2022,25 @@ const VOICE_OPTIONS = [
   { id: "male_fast",   label: "Masculina · Rápido",gender: "male",   rate: 1.15, pitch: 0.85 },
 ];
 
-function EarpieceRoom({ config, onBack }) {
+function EarpieceRoom({ config, onBack, onGoHome }) {
   const { isMobile } = useBreakpoint();
-  const [status,     setStatus]     = useState("waiting"); // waiting | listening | translating | speaking
-  const [transcript, setTranscript] = useState("");
-  const [lastMsg,    setLastMsg]    = useState(null);
-  const [messages,   setMessages]   = useState([]);
-  const [voiceId,    setVoiceId]    = useState("female_es");
-  const [activeSpeaker, setActiveSpeaker] = useState("A");
-  const [volume,     setVolume]     = useState(1);
-  const [copied,     setCopied]     = useState(false);
+  const [status,       setStatus]       = useState("waiting");
+  const [transcript,   setTranscript]   = useState("");
+  const [lastMsg,      setLastMsg]      = useState(null);
+  const [messages,     setMessages]     = useState([]);
+  const [voiceId,      setVoiceId]      = useState("female_es");
+  const [activeSpeaker,setActiveSpeaker]= useState(config.myKey || "A");
+  const [volume,       setVolume]       = useState(1);
+  const [copied,       setCopied]       = useState(false);
+  const [audioMode,    setAudioMode]    = useState("earpiece"); // "earpiece" | "speaker" | "text"
+  const [autoStarted,  setAutoStarted]  = useState(false);
   const recRef   = useRef(null);
   const speaking = useRef(false);
   const bottomRef = useRef(null);
 
-  const participants = ["A", "B", ...(config.count === 3 ? ["C"] : [])];
-  const roomLink = `${window.location.href.split("?")[0]}?room=${config.roomCode}`;
+  const myKey      = config.myKey || "A";
+  const participants = ["A", "B", ...(config.count === 30 || config.count > 3 ? [] : config.count === 3 ? ["C"] : [])];
+  const roomLink   = `${window.location.origin}?room=${config.roomCode}`;
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
@@ -1663,20 +2057,29 @@ function EarpieceRoom({ config, onBack }) {
     return { voice: match, rate: opt.rate, pitch: opt.pitch };
   }, [voiceId]);
 
-  // Speak translation
+  // Speak translation — respeta el modo de audio
   const speak = useCallback((text, langBcp) => {
     if (!text || speaking.current) return;
+    // Si es solo texto, no reproducir audio
+    if (audioMode === "text") {
+      speaking.current = false;
+      setStatus("waiting");
+      startListening();
+      return;
+    }
     window.speechSynthesis.cancel();
     const utt = new SpeechSynthesisUtterance(text);
     const { voice, rate, pitch } = getVoice(langBcp);
     if (voice) utt.voice = voice;
     utt.rate = rate; utt.pitch = pitch; utt.volume = volume;
+    // Modo altavoz: volumen máximo
+    if (audioMode === "speaker") utt.volume = 1;
     speaking.current = true;
     setStatus("speaking");
     utt.onend  = () => { speaking.current = false; setStatus("waiting"); startListening(); };
     utt.onerror= () => { speaking.current = false; setStatus("waiting"); };
     window.speechSynthesis.speak(utt);
-  }, [getVoice, volume]);
+  }, [getVoice, volume, audioMode]);
 
   // Main listen loop — FIX: escucha en español para detectar "Hola GlobalMeet"
   const startListening = useCallback(() => {
@@ -1789,17 +2192,35 @@ function EarpieceRoom({ config, onBack }) {
 
       {/* Header */}
       <div style={{ background: "rgba(7,8,15,.96)", borderBottom: "1px solid rgba(251,191,36,.15)", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "9px", cursor:"pointer" }} onClick={onGoHome}>
           <AppLogo size={24} withText />
           <span style={{ background: "rgba(251,191,36,.15)", color: "#fbbf24", borderRadius: "20px", padding: "2px 9px", fontSize: ".62rem", fontWeight: "700" }}>🎧 AURICULAR</span>
         </div>
-        <div style={{ display: "flex", gap: "6px" }}>
+        <div style={{ display: "flex", gap: "6px", alignItems:"center" }}>
+          {/* Selector modo audio */}
+          <select value={audioMode} onChange={e=>setAudioMode(e.target.value)} style={{ background:"rgba(255,255,255,.07)", border:"1px solid rgba(251,191,36,.25)", color:"#fbbf24", borderRadius:"7px", padding:"4px 8px", fontSize:".62rem", cursor:"pointer", outline:"none", fontFamily:"inherit" }}>
+            <option value="earpiece" style={{background:"#1e293b"}}>🎧 Auricular</option>
+            <option value="speaker"  style={{background:"#1e293b"}}>🔊 Altavoz</option>
+            <option value="text"     style={{background:"#1e293b"}}>📝 Solo texto</option>
+          </select>
           <button onClick={() => { navigator.clipboard.writeText(roomLink); setCopied(true); setTimeout(() => setCopied(false), 2000); }} style={{ background: copied ? "rgba(52,211,153,.12)" : "rgba(251,191,36,.1)", border: `1px solid ${copied ? "rgba(52,211,153,.3)" : "rgba(251,191,36,.25)"}`, color: copied ? "#34d399" : "#fbbf24", borderRadius: "7px", padding: "5px 9px", cursor: "pointer", fontSize: ".66rem", fontFamily: "inherit" }}>
             {copied ? "✓" : "🔗"}
           </button>
           <button onClick={() => { recRef.current?.stop(); window.speechSynthesis.cancel(); onBack(); }} style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", color: "#475569", borderRadius: "7px", padding: "5px 9px", cursor: "pointer", fontSize: ".66rem", fontFamily: "inherit" }}>← Salir</button>
         </div>
       </div>
+
+      {/* Modo info */}
+      {audioMode === "speaker" && (
+        <div style={{ background:"rgba(59,130,246,.1)", borderBottom:"1px solid rgba(59,130,246,.2)", padding:"6px 14px", color:"#60a5fa", fontSize:".72rem", textAlign:"center" }}>
+          🔊 Modo altavoz — la traducción se reproduce por el parlante del teléfono
+        </div>
+      )}
+      {audioMode === "text" && (
+        <div style={{ background:"rgba(100,116,139,.1)", borderBottom:"1px solid rgba(100,116,139,.2)", padding:"6px 14px", color:"#94a3b8", fontSize:".72rem", textAlign:"center" }}>
+          📝 Solo texto — la traducción aparece en pantalla sin audio
+        </div>
+      )}
 
       {/* Main */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -1918,11 +2339,15 @@ export default function App() {
 
   // Detectar sesión existente al cargar y manejar redirect de sala
   useEffect(() => {
-    // Detectar si hay un código de sala en la URL
+    // Detectar código de sala en la URL — funciona tanto en ?room= como después del redirect OAuth
     const urlParams = new URLSearchParams(window.location.search);
     const roomCode  = urlParams.get("room");
     if (roomCode) {
-      try { localStorage.setItem("gm_pending_room", roomCode); } catch {}
+      try { 
+        localStorage.setItem("gm_pending_room", roomCode);
+        // Limpiar la URL para que no quede el código visible
+        window.history.replaceState({}, document.title, "/");
+      } catch {}
     }
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -1944,7 +2369,7 @@ export default function App() {
           const pendingRoom = localStorage.getItem("gm_pending_room");
           if (pendingRoom) {
             localStorage.removeItem("gm_pending_room");
-            setChatCfg({ roomCode: pendingRoom, count: 2, hasVideo: false, hasEarpiece: false, names: { A: userData.name, B: "Participante B" }, langs: { A: "es", B: "en" } });
+            setChatCfg({ roomCode: pendingRoom, count: 2, hasVideo: false, hasEarpiece: false, names: { A: userData.name, B: "Participante B" }, langs: { A: "es", B: "en" }, myKey: `P${Date.now().toString(36).slice(-4).toUpperCase()}` });
             setScreen("joinRoom");
           } else {
             setScreen("dashboard");
