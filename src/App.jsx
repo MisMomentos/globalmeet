@@ -14,7 +14,7 @@ const UI_TRANSLATIONS = {
     slogan:        "Reuniones sin fronteras · Traducción simultánea",
     hello:         "¡Hola, Globalmeetero! 👋",
     community:     "Somos una comunidad de profesionales que rompen barreras del idioma en sus negocios.",
-    community2:    "Desde Buenos Aires hasta Tokio — todos hablamos el mismo idioma: los negocios.",
+    community2:    "Desde Mendoza hasta Tokio — todos hablamos el mismo idioma: los negocios.",
     loginBtn:      "Iniciar sesión con Google →",
     freedays:      "14 días gratis · Sin tarjeta de crédito",
     monthly:       "Mensual",
@@ -1178,7 +1178,6 @@ function LandingScreen({ onLogin, onTrial, onChangePlan, isLoggedIn }) {
       <style>{`
         @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
         @keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-        @keyframes orbit{from{transform:rotate(0deg) translateX(70px) rotate(0deg)}to{transform:rotate(360deg) translateX(70px) rotate(-360deg)}}
         .pcard{transition:transform .25s,box-shadow .25s;} @media(hover:hover){.pcard:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.5);}}
         .mpbtn{transition:opacity .2s;} @media(hover:hover){.mpbtn:hover{opacity:.82;}}
       `}</style>
@@ -1195,59 +1194,76 @@ function LandingScreen({ onLogin, onTrial, onChangePlan, isLoggedIn }) {
       </div>
 
       {/* ── PRIMERO: Comunidad Globalmeeteros ── */}
-      <div style={{ textAlign:"center", padding: isMobile?"40px 20px 20px":"56px 24px 24px", background:"radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,102,241,.15) 0%,transparent 70%)", animation:"fadeIn .8s ease" }}>
-        {/* Logo con banderas orbitando — funciona en desktop y mobile */}
-        <div style={{ position:"relative", width:"160px", height:"160px", margin:"0 auto 20px" }}>
-          <div style={{ width:"120px", height:"120px", borderRadius:"50%", background:"radial-gradient(circle, rgba(99,102,241,.2), rgba(45,212,191,.1))", border:"2px solid rgba(99,102,241,.3)", display:"flex", alignItems:"center", justifyContent:"center", position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", animation:"floatY 4s ease-in-out infinite" }}>
-            <AppLogo size={60} />
+      <div style={{ textAlign:"center", padding: isMobile?"32px 20px 24px":"52px 24px 28px", background:"radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,102,241,.15) 0%,transparent 70%)", animation:"fadeIn .8s ease" }}>
+
+        {/* Logo con banderas posicionadas alrededor — sin rotación para que se vean bien */}
+        <div style={{ position:"relative", width:"220px", height:"220px", margin:"0 auto 24px" }}>
+          {/* Círculo central con logo */}
+          <div style={{ width:"110px", height:"110px", borderRadius:"50%", background:"radial-gradient(circle, rgba(99,102,241,.25), rgba(45,212,191,.1))", border:"2px solid rgba(99,102,241,.25)", display:"flex", alignItems:"center", justifyContent:"center", position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", animation:"floatY 4s ease-in-out infinite" }}>
+            <AppLogo size={58} />
           </div>
-          {/* Banderas orbitando con CSS animation — funciona en desktop */}
-          {["🇦🇷","🇺🇸","🇧🇷","🇫🇷","🇩🇪","🇯🇵","🇨🇳","🇮🇹"].map((flag,i) => (
-            <div key={i} style={{ position:"absolute", top:"50%", left:"50%", width:"24px", height:"24px", marginTop:"-12px", marginLeft:"-12px", fontSize:"1.1rem", animation:`orbit ${8+i*0.5}s linear ${i*-1}s infinite`, transformOrigin:"0 0", display:"flex", alignItems:"center", justifyContent:"center", filter:"drop-shadow(0 2px 4px rgba(0,0,0,.4))" }}>
-              {flag}
+          {/* Banderas posicionadas estáticamente en círculo — se ven como emojis reales */}
+          {[
+            { flag:"🇦🇷", top:"0%",   left:"50%",  tx:"-50%", ty:"0"    },
+            { flag:"🇺🇸", top:"14%",  left:"86%",  tx:"0",    ty:"0"    },
+            { flag:"🇧🇷", top:"50%",  left:"100%", tx:"0",    ty:"-50%" },
+            { flag:"🇫🇷", top:"86%",  left:"86%",  tx:"0",    ty:"-100%"},
+            { flag:"🇩🇪", top:"100%", left:"50%",  tx:"-50%", ty:"-100%"},
+            { flag:"🇯🇵", top:"86%",  left:"14%",  tx:"-100%",ty:"-100%"},
+            { flag:"🇨🇳", top:"50%",  left:"0%",   tx:"-100%",ty:"-50%" },
+            { flag:"🇮🇹", top:"14%",  left:"14%",  tx:"-100%",ty:"0"    },
+          ].map((item,i) => (
+            <div key={i} style={{ position:"absolute", top:item.top, left:item.left, transform:`translate(${item.tx}, ${item.ty})`, fontSize:"1.4rem", lineHeight:1, filter:"drop-shadow(0 2px 6px rgba(0,0,0,.5))" }}>
+              {item.flag}
             </div>
           ))}
         </div>
 
-        <h1 style={{ fontSize: isMobile?"2rem":"clamp(2rem,4vw,3rem)", fontWeight:"700", margin:"0 0 6px", color:"#f1f5f9", fontFamily:"'Segoe UI',system-ui,sans-serif" }}>
+        <h1 style={{ fontSize: isMobile?"2.2rem":"clamp(2.2rem,4vw,3.2rem)", fontWeight:"700", margin:"0 0 10px", color:"#f1f5f9", fontFamily:"'Segoe UI',system-ui,sans-serif", lineHeight:1.2 }}>
           {t("hello")}
         </h1>
-        <p style={{ color:"#64748b", fontSize: isMobile?".82rem":".92rem", margin:"0 0 4px", lineHeight:1.6, maxWidth:"540px", marginLeft:"auto", marginRight:"auto" }}>
+        <p style={{ color:"#64748b", fontSize: isMobile?".84rem":".94rem", margin:"0 0 6px", lineHeight:1.7, maxWidth:"560px", marginLeft:"auto", marginRight:"auto" }}>
           {t("community")}
         </p>
-        <p style={{ color:"#475569", fontSize:".8rem", margin:"0 0 24px" }}>
+        <p style={{ color:"#475569", fontSize: isMobile?".78rem":".84rem", margin:"0 0 28px" }}>
           {t("community2")}
         </p>
 
-        {/* Stats */}
-        <div style={{ display:"flex", gap:"12px", justifyContent:"center", flexWrap:"wrap", marginBottom:"24px" }}>
-          {[{n:"10",label:"Idiomas",icon:"🌐"},{n:"30",label:"Max/sala",icon:"👥"},{n:"24/7",label:"Disponible",icon:"⏰"},{n:"0",label:"Barreras",icon:"🚫"}].map((s,i)=>(
-            <div key={i} style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.08)", borderRadius:"12px", padding:"10px 16px", minWidth:"80px" }}>
-              <div style={{ fontSize:"1rem" }}>{s.icon}</div>
-              <div style={{ color:"#a5b4fc", fontWeight:"700", fontSize:"1.1rem" }}>{s.n}</div>
-              <div style={{ color:"#475569", fontSize:".65rem" }}>{s.label}</div>
+        {/* Stats — sin bordes blancos fuertes */}
+        <div style={{ display:"flex", gap:"10px", justifyContent:"center", flexWrap:"wrap", marginBottom:"28px" }}>
+          {[
+            {n:"10",   label:t("slogan").includes("10") ? "Idiomas" : "Idiomas", icon:"🌐"},
+            {n:"30",   label:"Max/sala", icon:"👥"},
+            {n:"24/7", label:"Disponible", icon:"⏰"},
+            {n:"0",    label:"Barreras", icon:"🚫"},
+          ].map((s,i)=>(
+            <div key={i} style={{ background:"rgba(99,102,241,.08)", border:"1px solid rgba(99,102,241,.15)", borderRadius:"14px", padding:"12px 20px", minWidth:"85px" }}>
+              <div style={{ fontSize:"1.1rem", marginBottom:"4px" }}>{s.icon}</div>
+              <div style={{ color:"#a5b4fc", fontWeight:"700", fontSize:"1.2rem" }}>{s.n}</div>
+              <div style={{ color:"#475569", fontSize:".68rem" }}>{s.label}</div>
             </div>
           ))}
         </div>
 
         {/* Nombre y slogan */}
-        <h2 style={{ fontSize: isMobile?"1.8rem":"2.4rem", fontWeight:"400", fontStyle:"italic", letterSpacing:".06em", margin:"0 0 4px", color:"#f1f5f9", textShadow:"0 0 60px rgba(99,102,241,.4)", fontFamily:"'Georgia',serif" }}>
+        <h2 style={{ fontSize: isMobile?"2rem":"2.8rem", fontWeight:"400", fontStyle:"italic", letterSpacing:".06em", margin:"0 0 6px", color:"#f1f5f9", textShadow:"0 0 60px rgba(99,102,241,.4)", fontFamily:"'Georgia',serif" }}>
           {APP_NAME}
         </h2>
-        <p style={{ color:"#64748b", fontSize: isMobile?".8rem":".88rem", margin:"0 0 4px" }}>{t("slogan")}</p>
-        <p style={{ color:"#1e293b", fontSize:".62rem", margin:"0 0 20px", letterSpacing:".1em" }}>DISEÑADO POR MOMENTOS</p>
+        <p style={{ color:"#64748b", fontSize: isMobile?".82rem":".9rem", margin:"0 0 6px" }}>{t("slogan")}</p>
+        <p style={{ color:"#1e293b", fontSize:".62rem", margin:"0 0 24px", letterSpacing:".1em" }}>DISEÑADO POR MOMENTOS</p>
 
         {BROWSER.micWarning && <p style={{ color:"#d97706", fontSize:".73rem", margin:"0 0 14px" }}>⚠️ {BROWSER.micWarning}</p>}
 
-        <button onClick={onLogin} style={{ background:"linear-gradient(135deg,#4f46e5,#7c3aed)", border:"none", color:"#fff", borderRadius:"12px", padding: isMobile?"13px 24px":"13px 30px", fontSize:".92rem", fontWeight:"600", cursor:"pointer", fontFamily:"'Segoe UI',inherit", boxShadow:"0 6px 28px rgba(99,102,241,.45)", touchAction:"manipulation" }}>
+        {/* Botón login — prominente y centrado */}
+        <button onClick={onLogin} style={{ background:"linear-gradient(135deg,#4f46e5,#7c3aed)", border:"none", color:"#fff", borderRadius:"14px", padding: isMobile?"14px 28px":"15px 36px", fontSize: isMobile?".92rem":"1rem", fontWeight:"600", cursor:"pointer", fontFamily:"'Segoe UI',sans-serif", boxShadow:"0 8px 32px rgba(99,102,241,.5)", touchAction:"manipulation", display:"inline-block" }}>
           {t("loginBtn")}
         </button>
-        <p style={{ marginTop:"10px", color:"#334155", fontSize:".72rem" }}>{t("freedays")}</p>
+        <p style={{ marginTop:"10px", color:"#334155", fontSize:".74rem", marginBottom:"24px" }}>{t("freedays")}</p>
 
-        {/* Banderas decorativas en fila */}
-        <div style={{ display:"flex", gap:"6px", justifyContent:"center", flexWrap:"wrap", marginTop:"16px", fontSize:"1.3rem" }}>
+        {/* Banderas en fila — emojis reales sin rotación */}
+        <div style={{ display:"flex", gap:"8px", justifyContent:"center", flexWrap:"wrap", fontSize: isMobile?"1.4rem":"1.6rem", lineHeight:1, padding:"0 10px" }}>
           {["🇦🇷","🇺🇸","🇧🇷","🇫🇷","🇩🇪","🇯🇵","🇨🇳","🇸🇦","🇷🇺","🇮🇹","🇲🇽","🇨🇴","🇨🇱","🇺🇾","🇵🇪"].map((f,i)=>(
-            <span key={i} style={{ filter:"drop-shadow(0 1px 3px rgba(0,0,0,.3))" }}>{f}</span>
+            <span key={i}>{f}</span>
           ))}
         </div>
       </div>
